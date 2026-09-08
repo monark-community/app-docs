@@ -77,6 +77,11 @@ if (!fs.existsSync(SOURCE)) {
 /** GitHub URL for content we link to but don't publish. */
 const SOURCE_REPO_BLOB = "https://github.com/monark-community/app/blob/develop"
 
+/** Where the source repo keeps doc figures, and where they land here. */
+const SOURCE_ASSETS = "docs/assets"
+const ASSET_OUT = path.join(process.cwd(), "public", "docs-assets")
+const ASSET_URL_PREFIX = "/docs-assets"
+
 // ── frontmatter derivation ────────────────────────────────────────────────
 
 function firstHeading(md: string): string | null {
@@ -192,6 +197,13 @@ function rewriteLinks(md: string, fromDir: string): string {
         .replace(/\\/g, "/")
         .replace(/^\.\//, "")
 
+      // A figure : copied into this site's public tree by `copyAssets` below,
+      // so every doc references it at one flat path regardless of how deep in
+      // the source repo the doc that embeds it lives.
+      if (/\.(png|jpe?g|gif|svg|webp)$/i.test(repoRelative)) {
+        return `](${ASSET_URL_PREFIX}/${path.basename(repoRelative)})`
+      }
+
       // A module's user guide lives at packages/<name>/docs/user-guide.md.
       const moduleMatch = repoRelative.match(/^packages\/([^/]+)\/docs\/user-guide\.md$/)
       if (moduleMatch) return `](/docs/modules/${moduleMatch[1]}${hash})`
@@ -270,7 +282,30 @@ function collect(mapping: Mapping): SourceDoc[] {
 
 // ── run ───────────────────────────────────────────────────────────────────
 
+/**
+ * Copy the source repo's doc figures into `public/docs-assets/`, flattened.
+ * Flat because the docs that embed them sit at different depths (a module's
+ * guide is four levels down from `docs/assets`), and a doc shouldn't have to
+ * know where it ended up on the site to point at its own picture.
+ */
+function copyAssets(): number {
+  const from = path.join(SOURCE, SOURCE_ASSETS)
+  if (!fs.existsSync(from)) return 0
+  fs.mkdirSync(ASSET_OUT, { recursive: true })
+  let copied = 0
+  for (const entry of fs.readdirSync(from, { withFileTypes: true })) {
+    if (!entry.isFile()) continue
+    fs.copyFileSync(path.join(from, entry.name), path.join(ASSET_OUT, entry.name))
+    copied++
+  }
+  return copied
+}
+
 if (CLEAN && fs.existsSync(OUT)) fs.rmSync(OUT, { recursive: true })
+if (CLEAN && fs.existsSync(ASSET_OUT)) fs.rmSync(ASSET_OUT, { recursive: true })
+
+const assets = copyAssets()
+if (assets > 0) console.log(`[sync-docs] assets: ${assets} file(s) -> public/docs-assets`)
 
 let written = 0
 for (const mapping of MAPPINGS) {
