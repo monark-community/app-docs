@@ -1,0 +1,15 @@
+---
+title: "1.2 Fill the `monark-cron-shared` env-var group"
+description: "The api service inherits both via fromGroup: monark-cron-shared ; no need to duplicate."
+order: 2
+source: "docs/technical-documentation/deploy-checklist/phase-1-render-api-cron-services/12-fill-the-monark-cron-shared-env-var-group.md"
+---
+
+# 1.2 Fill the `monark-cron-shared` env-var group
+
+| Key           | Value                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| `CRON_SECRET` | the secret from 0.1                                                                         |
+| `API_URL`     | `https://monark-api.onrender.com` ← placeholder for now ; we'll update once the api is live |
+
+The api service inherits both via `fromGroup: monark-cron-shared` ; no need to duplicate.

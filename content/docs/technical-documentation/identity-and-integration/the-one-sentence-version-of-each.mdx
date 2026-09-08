@@ -1,0 +1,18 @@
+---
+title: "The one-sentence version of each"
+description: "Two axes, then: direction (who initiates) and kind (a credential versus an identity versus an event stream). Laid out that way the whole surface fits in one table."
+order: 1
+source: "docs/technical-documentation/identity-and-integration/the-one-sentence-version-of-each.md"
+---
+
+# The one-sentence version of each
+
+| Primitive                                                              | The question it answers                                         | Direction                        |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------- |
+| **Secrets** ([`@monark/secrets`](https://github.com/monark-community/app/blob/develop/packages/secrets/README.md))    | "How does _Monark_ prove who it is to someone else's system ?"  | Monark to outward ; a credential |
+| **API keys** ([`@monark/api-keys`](https://github.com/monark-community/app/blob/develop/packages/api-keys/README.md)) | "How does _someone else_ prove who they are to Monark ?"        | Outward to Monark ; a credential |
+| **Service accounts** (same module)                                     | "_Whose_ permissions does a machine caller have ?"              | An identity, not a credential    |
+| **Webhooks** ([`@monark/webhooks`](https://github.com/monark-community/app/blob/develop/packages/webhooks/README.md)) | "How does someone else find out that something happened here ?" | Monark to outward ; events       |
+
+Two axes, then: **direction** (who initiates) and **kind** (a credential versus an identity versus an
+event stream). Laid out that way the whole surface fits in one table.

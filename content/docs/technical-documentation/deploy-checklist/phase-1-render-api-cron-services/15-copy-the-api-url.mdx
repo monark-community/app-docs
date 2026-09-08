@@ -1,0 +1,14 @@
+---
+title: "1.5 Copy the api URL"
+description: "Once the deploy goes green, the dashboard shows the public URL. Format : https://monark-api.onrender.com (or whatever Render auto-assigns)."
+order: 5
+source: "docs/technical-documentation/deploy-checklist/phase-1-render-api-cron-services/15-copy-the-api-url.md"
+---
+
+# 1.5 Copy the api URL
+
+Once the deploy goes green, the dashboard shows the public URL. Format : `https://monark-api.onrender.com` (or whatever Render auto-assigns).
+
+Update `monark-cron-shared.API_URL` to this value. The two cron services pick it up on their next scheduled run.
+
+---

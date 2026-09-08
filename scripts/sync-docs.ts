@@ -271,15 +271,28 @@ function collect(mapping: Mapping): SourceDoc[] {
 
   const dir = path.join(SOURCE, mapping.from)
   if (!fs.existsSync(dir)) return []
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => ({
-      file: path.join(dir, f),
-      fromDir: mapping.from,
-      section: mapping.section,
-      slug: path.basename(f, ".md"),
-    }))
+
+  // Walk, don't list: the source keeps long guides as a folder of focused
+  // pages, and the site mirrors that shape (see the tree in lib/docs.ts).
+  const out: SourceDoc[] = []
+  const walk = (current: string, relative: string[]) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true }).sort()) {
+      const abs = path.join(current, entry.name)
+      if (entry.isDirectory()) {
+        walk(abs, [...relative, entry.name])
+        continue
+      }
+      if (!entry.name.endsWith(".md")) continue
+      out.push({
+        file: abs,
+        fromDir: [mapping.from, ...relative].join("/"),
+        section: mapping.section,
+        slug: [...relative, path.basename(entry.name, ".md")].join("/"),
+      })
+    }
+  }
+  walk(dir, [])
+  return out
 }
 
 // ── run ───────────────────────────────────────────────────────────────────
@@ -317,14 +330,28 @@ for (const mapping of MAPPINGS) {
     continue
   }
 
-  const order =
-    mapping.kind === "dir"
-      ? sectionOrder(
-          path.join(SOURCE, mapping.from),
-          docs.map((d) => d.slug),
-          mapping.pinned,
-        )
-      : sectionOrder("", docs.map((d) => d.slug), mapping.pinned)
+  // Order is resolved per directory: a folder's own `_index.md` orders its
+  // children, exactly as the section's does at the top level.
+  const order = new Map<string, number>()
+  if (mapping.kind === "dir") {
+    const byDir = new Map<string, string[]>()
+    for (const doc of docs) {
+      const dir = doc.slug.includes("/") ? doc.slug.slice(0, doc.slug.lastIndexOf("/")) : ""
+      const list = byDir.get(dir) ?? []
+      list.push(path.basename(doc.slug))
+      byDir.set(dir, list)
+    }
+    for (const [dir, names] of byDir) {
+      const source = path.join(SOURCE, mapping.from, dir)
+      for (const [name, n] of sectionOrder(source, names, dir ? [] : mapping.pinned)) {
+        order.set(dir ? `${dir}/${name}` : name, n)
+      }
+    }
+  } else {
+    for (const [name, n] of sectionOrder("", docs.map((d) => d.slug), mapping.pinned)) {
+      order.set(name, n)
+    }
+  }
 
   const outDir = path.join(OUT, mapping.section)
   fs.mkdirSync(outDir, { recursive: true })
@@ -342,7 +369,9 @@ for (const mapping of MAPPINGS) {
       source: `${doc.fromDir}/${path.basename(doc.file)}`,
     })
 
-    fs.writeFileSync(path.join(outDir, `${doc.slug}.mdx`), meta + body, "utf-8")
+    const target = path.join(outDir, `${doc.slug}.mdx`)
+    fs.mkdirSync(path.dirname(target), { recursive: true })
+    fs.writeFileSync(target, meta + body, "utf-8")
     written++
   }
   console.log(`[sync-docs] ${mapping.section}: ${docs.length} page(s)`)
