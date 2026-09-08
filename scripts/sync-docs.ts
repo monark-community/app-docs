@@ -123,11 +123,21 @@ function sectionOrder(dir: string, slugs: string[], pinned: string[] = []): Map<
   const indexPath = path.join(dir, "_index.md")
 
   if (fs.existsSync(indexPath)) {
-    order.set("_index", 0)
+    // The landing page is the folder, not an entry inside it ; its own order
+    // is assigned by the *parent* directory (see `orderOfFolders` below), so
+    // giving it 0 here would sort the whole folder first among its siblings.
     let next = 1
     const index = fs.readFileSync(indexPath, "utf-8")
-    for (const m of index.matchAll(/\]\(([^)]+?)\.md\)/g)) {
-      const slug = path.basename(m[1] ?? "")
+    // A contents list is the author's running order : "In this section" links
+    // in the order a reader should meet the pages. That is the story order,
+    // and it beats alphabetical.
+    for (const m of index.matchAll(/\]\(([^)\s]+?)\.md\)/g)) {
+      const target = m[1] ?? ""
+      // A link to a section that has since become a folder points at its
+      // landing page (`webhooks/_index.md`) ; the entry it names is the
+      // folder, so read the directory rather than the file.
+      const slug =
+        path.basename(target) === "_index" ? path.basename(path.dirname(target)) : path.basename(target)
       if (slug && slugs.includes(slug) && !order.has(slug)) order.set(slug, next++)
     }
     for (const slug of [...slugs].sort()) if (!order.has(slug)) order.set(slug, next++)
@@ -233,6 +243,28 @@ function rewriteLinks(md: string, fromDir: string): string {
   )
 }
 
+/**
+ * Pull an author's own frontmatter off a source doc, if it has any.
+ *
+ * Deliberately minimal (`key: value`, one line each) rather than a YAML
+ * dependency : the only keys that mean anything here are `title`,
+ * `description` and `order`, and the source repo's docs are plain Markdown
+ * that mostly carries none of them.
+ */
+function splitFrontmatter(text: string): {
+  front: Record<string, string | undefined>
+  raw: string
+} {
+  const m = text.match(/^---[^\n]*\n([\s\S]*?)\n---[^\n]*\n?/)
+  if (!m) return { front: {}, raw: text }
+  const front: Record<string, string> = {}
+  for (const line of (m[1] ?? "").split("\n")) {
+    const kv = line.match(/^([A-Za-z][\w-]*):\s*(.*)$/)
+    if (kv) front[kv[1] as string] = (kv[2] ?? "").trim().replace(/^["']|["']$/g, "")
+  }
+  return { front, raw: text.slice(m[0].length) }
+}
+
 function frontmatter(fields: Record<string, string | number>): string {
   const lines = Object.entries(fields).map(([k, v]) =>
     typeof v === "number" ? `${k}: ${v}` : `${k}: ${JSON.stringify(v)}`,
@@ -330,21 +362,45 @@ for (const mapping of MAPPINGS) {
     continue
   }
 
-  // Order is resolved per directory: a folder's own `_index.md` orders its
-  // children, exactly as the section's does at the top level.
+  // Order is resolved per directory, over that directory's entries as the
+  // reader meets them : the pages directly in it AND the folders under it,
+  // numbered together. Numbering them separately is what let a folder and a
+  // page claim the same position.
   const order = new Map<string, number>()
   if (mapping.kind === "dir") {
-    const byDir = new Map<string, string[]>()
-    for (const doc of docs) {
-      const dir = doc.slug.includes("/") ? doc.slug.slice(0, doc.slug.lastIndexOf("/")) : ""
-      const list = byDir.get(dir) ?? []
-      list.push(path.basename(doc.slug))
-      byDir.set(dir, list)
+    // dir -> { files: [name], dirs: [name] }
+    const entries = new Map<string, { files: string[]; dirs: Set<string> }>()
+    const bucket = (dir: string) => {
+      let e = entries.get(dir)
+      if (!e) {
+        e = { files: [], dirs: new Set() }
+        entries.set(dir, e)
+      }
+      return e
     }
-    for (const [dir, names] of byDir) {
+    for (const doc of docs) {
+      const parts = doc.slug.split("/")
+      const dir = parts.slice(0, -1).join("/")
+      const name = parts[parts.length - 1] as string
+      // `_index` is the folder itself, ordered by the parent, not a child.
+      if (name !== "_index") bucket(dir).files.push(name)
+      // Register every ancestor folder with its own parent.
+      for (let i = parts.length - 1; i > 0; i--) {
+        const child = parts[i - 1] as string
+        const parent = parts.slice(0, i - 1).join("/")
+        bucket(parent).dirs.add(child)
+      }
+    }
+
+    for (const [dir, { files, dirs }] of entries) {
       const source = path.join(SOURCE, mapping.from, dir)
-      for (const [name, n] of sectionOrder(source, names, dir ? [] : mapping.pinned)) {
-        order.set(dir ? `${dir}/${name}` : name, n)
+      const names = [...files, ...dirs]
+      const resolved = sectionOrder(source, names, dir ? [] : mapping.pinned)
+      for (const [name, n] of resolved) {
+        const slug = dir ? `${dir}/${name}` : name
+        // A folder's position is carried by its landing page, which is what
+        // the site sorts the folder by.
+        order.set(dirs.has(name) ? `${slug}/_index` : slug, n)
       }
     }
   } else {
@@ -357,14 +413,19 @@ for (const mapping of MAPPINGS) {
   fs.mkdirSync(outDir, { recursive: true })
 
   for (const doc of docs) {
-    const raw = fs.readFileSync(doc.file, "utf-8")
-    const title = firstHeading(raw) ?? doc.slug
+    const file = fs.readFileSync(doc.file, "utf-8")
+    // A source doc may carry its own frontmatter to override what would
+    // otherwise be derived. `order` is the one that matters : it is how an
+    // author pins a page's place in the story when neither the contents list
+    // nor alphabetical says what they mean.
+    const { front, raw } = splitFrontmatter(file)
+    const title = front.title ?? firstHeading(raw) ?? doc.slug
     const body = escapeMdx(rewriteLinks(raw, doc.fromDir))
 
     const meta = frontmatter({
       title,
-      description: firstParagraph(raw),
-      order: order.get(doc.slug) ?? 999,
+      description: front.description ?? firstParagraph(raw),
+      order: front.order !== undefined ? Number(front.order) : (order.get(doc.slug) ?? 999),
       // Provenance, so a reader of the generated file knows not to edit it.
       source: `${doc.fromDir}/${path.basename(doc.file)}`,
     })

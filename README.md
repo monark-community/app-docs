@@ -72,6 +72,25 @@ content the site doesn't publish becomes an absolute GitHub URL rather than a de
 A file named `_index.md` is its folder's landing page: `user-guide/_index.mdx` answers at
 `/docs/user-guide`.
 
+## Ordering
+
+The sidebar is not alphabetical. Order is resolved per directory, over that directory's pages
+**and** the folders under it together, so a folder can sit between two pages rather than always
+after them. Three levers, in priority order:
+
+1. **`order:` in a source page's frontmatter.** The blunt instrument, for when a page has to sit
+   somewhere specific regardless of anything else.
+2. **The contents list in the folder's `_index.md`.** The links there, in the order they appear,
+   *are* the running order. This is the usual lever: the list already says what a reader should
+   meet first, so reordering the list reorders the sidebar. A link to a section that has since
+   become a folder (`webhooks/_index.md`) still names that folder.
+3. **Alphabetical**, for anything neither of the above mentions, after the section's `pinned`
+   entries from `scripts/sync-docs.ts`.
+
+A folder's own position comes from its **parent's** ordering, carried on its `_index`. Reading it
+from the landing page's order *within* its own folder is always 0, which silently sorts every
+folder first.
+
 ## White-labeling
 
 Three files, no component edits:

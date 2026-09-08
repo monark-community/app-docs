@@ -9,6 +9,7 @@ import type { DocMeta, DocNode, DocSection } from "@shell/lib/types"
 import { sectionIcon } from "@shell/lib/section-icon"
 import { useLocale } from "@shell/lib/i18n"
 import { Backdrop } from "@shell/components/shell-ui/backdrop"
+import { DragHandle } from "@shell/components/shell-ui/drag-handle"
 
 import type { ActiveSection } from "@shell/hooks/use-active-section"
 
@@ -54,6 +55,7 @@ export function Sidebar({
   const pathname = (usePathname() ?? "").replace(/\/$/, "") || "/"
 
   const isMobile = useIsMobile()
+  const { width, dragging, onResizeStart, onResizeMove, onResizeEnd } = useSidebarWidth()
 
   // Close floating nav on mobile navigation only
   const isMobileRef = useRef(isMobile)
@@ -129,13 +131,100 @@ export function Sidebar({
       {/* Desktop inline sidebar — only when not collapsed */}
       {showDesktop && !collapsed && (
         <aside
-          className="hidden md:block w-64 border-r border-border bg-background h-[calc(100vh-3.5rem)] overflow-y-auto overflow-x-hidden sticky top-14 shrink-0"
+          style={{ width }}
+          className="relative hidden md:block border-r border-border bg-background h-[calc(100vh-3.5rem)] overflow-y-auto overflow-x-hidden sticky top-14 shrink-0"
         >
           {desktopNavContent}
+          {/* Right-edge resize grip, matching the app's detail panels : the
+              chip reveals on hover and stays while dragging. Inside the
+              scrolling aside but pinned to its full height, so it tracks the
+              edge rather than the scrolled content. */}
+          <DragHandle
+            orientation="vertical"
+            active={dragging}
+            highlight
+            onPointerDown={onResizeStart}
+            onPointerMove={onResizeMove}
+            onPointerUp={onResizeEnd}
+            className="absolute right-0 top-0 z-20 h-full w-1.5"
+            style={{ height: "100%" }}
+          />
         </aside>
       )}
     </>
   )
+}
+
+/** Default, floor and ceiling for the sidebar's width, in pixels. */
+const DEFAULT_WIDTH = 256
+const MIN_WIDTH = 180
+const MAX_WIDTH = 520
+const WIDTH_KEY = "docs-shell.sidebar-width"
+
+/**
+ * Drag-to-resize for the desktop sidebar, persisted per browser.
+ *
+ * Mirrors the app's detail-panel resize: pointer capture on the grip, the
+ * width clamped so the nav can neither vanish nor crowd out the article, and
+ * the final value written to localStorage on pointer-up rather than on every
+ * move (one write per drag, not one per frame).
+ */
+function useSidebarWidth() {
+  const [width, setWidth] = useState<number>(DEFAULT_WIDTH)
+  const [dragging, setDragging] = useState(false)
+  const lastWidth = useRef(DEFAULT_WIDTH)
+
+  // Read the stored width after mount rather than in the initializer: the
+  // server renders the default, and reading during render would make the
+  // first client paint disagree with it.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(WIDTH_KEY)
+      if (raw) {
+        const stored = clamp(Number(raw))
+        setWidth(stored)
+        lastWidth.current = stored
+      }
+    } catch {
+      // Private mode / blocked storage : the default stands.
+    }
+  }, [])
+
+  const onResizeStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    setDragging(true)
+  }, [])
+
+  const onResizeMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!dragging) return
+      // The sidebar's left edge is the viewport's, so the pointer's x is the
+      // width directly.
+      const next = clamp(e.clientX)
+      lastWidth.current = next
+      setWidth(next)
+    },
+    [dragging],
+  )
+
+  const onResizeEnd = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    setDragging(false)
+    try {
+      window.localStorage.setItem(WIDTH_KEY, String(lastWidth.current))
+    } catch {
+      // Not being able to remember the width is not worth failing a drag.
+    }
+  }, [])
+
+  return { width, dragging, onResizeStart, onResizeMove, onResizeEnd }
+}
+
+function clamp(px: number): number {
+  if (!Number.isFinite(px)) return DEFAULT_WIDTH
+  const ceiling =
+    typeof window === "undefined" ? MAX_WIDTH : Math.min(MAX_WIDTH, window.innerWidth * 0.4)
+  return Math.round(Math.min(Math.max(px, MIN_WIDTH), Math.max(MIN_WIDTH, ceiling)))
 }
 
 function SidebarTree({
