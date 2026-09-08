@@ -7,5 +7,9 @@ next-env.d.ts
 # Generated at build time from content/docs by `pnpm generate:search-index`.
 public/api/
 
+# Checkout of the source repository, made by the sync workflow (and handy
+# locally: `pnpm sync:docs --source .app-source`).
+.app-source/
+
 .env*
 .DS_Store

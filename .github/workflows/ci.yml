@@ -1,0 +1,49 @@
+name: CI
+
+# Lint, typecheck, and a full static export. The export is the real gate:
+# it's where a broken MDX file or a bad link surfaces, and it's exactly
+# what the deploy runs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # Also regenerates public/api/search-index.json via `prebuild`, so a
+      # search index that can't be built fails here rather than shipping
+      # stale.
+      - name: Build
+        run: pnpm build
