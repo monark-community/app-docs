@@ -76,6 +76,15 @@ export interface DocMeta {
   titles: Record<string, string>
 }
 
+/**
+ * One entry in a section's sidebar. Folders nest as deeply as the content
+ * does ; a folder's `index` is its landing page (`_index.mdx`), which also
+ * supplies its label and its sort order among siblings.
+ */
+export type DocNode =
+  | { kind: "doc"; doc: DocMeta }
+  | { kind: "folder"; label: string; path: string; index: DocMeta | null; children: DocNode[] }
+
 /** Full MDX body of a doc for one locale, plus its metadata. */
 export interface DocContent {
   meta: Omit<DocMeta, "titles">

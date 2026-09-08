@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useIsMobile } from "@shell/hooks/use-mobile"
 import { ChevronRight } from "lucide-react"
-import type { DocMeta, DocSection } from "@shell/lib/types"
+import type { DocMeta, DocNode, DocSection } from "@shell/lib/types"
 import { sectionIcon } from "@shell/lib/section-icon"
 import { useLocale } from "@shell/lib/i18n"
 import { Backdrop } from "@shell/components/shell-ui/backdrop"
@@ -13,7 +13,11 @@ import { Backdrop } from "@shell/components/shell-ui/backdrop"
 import type { ActiveSection } from "@shell/hooks/use-active-section"
 
 interface SidebarProps {
-  docs: DocMeta[]
+  /**
+   * Sidebar tree per section dir, mirroring the content folder structure.
+   * The empty-string key holds docs that sit at the root of the tree.
+   */
+  trees: Record<string, DocNode[]>
   /** Ordered docs sections — one collapsible block each, in header-tab order. */
   sections: DocSection[]
   open?: boolean
@@ -34,7 +38,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({
-  docs,
+  trees,
   sections,
   open,
   onClose,
@@ -63,24 +67,15 @@ export function Sidebar({
 
   const renderSection = (section: DocSection) => (
     <SidebarSection key={section.dir} icon={sectionIcon(section.icon)} title={section.label}>
-      <SidebarDocList
-        docs={docs.filter((d) => d.section === section.dir)}
-        pathname={pathname}
-      />
+      <SidebarTree nodes={trees[section.dir] ?? []} pathname={pathname} />
     </SidebarSection>
   )
 
   // Docs sitting at the root of the content tree belong to no section; they
   // render above the sections rather than being dropped.
-  const rootDocs = docs.filter((d) => !d.section)
+  const rootNodes = trees[""] ?? []
   const rootSection =
-    rootDocs.length > 0 ? (
-      <ul className="space-y-1">
-        {rootDocs.map((doc) => (
-          <SidebarDocLink key={doc.slug} doc={doc} pathname={pathname} />
-        ))}
-      </ul>
-    ) : null
+    rootNodes.length > 0 ? <SidebarTree nodes={rootNodes} pathname={pathname} /> : null
 
   // Mobile: always show every section (no topbar tabs on mobile)
   const mobileNavContent = (
@@ -143,76 +138,62 @@ export function Sidebar({
   )
 }
 
-function SidebarDocList({
-  docs,
+function SidebarTree({
+  nodes,
   pathname,
+  depth = 0,
 }: {
-  docs: DocMeta[]
+  nodes: DocNode[]
   pathname: string
+  depth?: number
 }) {
-  // Fast path: nothing nested → flat list.
-  const grouped = docs.filter((d) => d.group)
-  if (grouped.length === 0) {
-    return (
-      <ul className="space-y-1">
-        {docs.map((doc) => (
-          <SidebarDocLink key={doc.slug} doc={doc} pathname={pathname} />
-        ))}
-      </ul>
-    )
-  }
-
-  // Docs directly under the section render first, then each sub-folder as a
-  // collapsible group in the order the loader emitted them (folder name).
-  const ungrouped = docs.filter((d) => !d.group)
-  const groups: Array<{ slug: string; docs: DocMeta[] }> = []
-  for (const doc of grouped) {
-    const existing = groups.find((g) => g.slug === doc.group)
-    if (existing) existing.docs.push(doc)
-    else groups.push({ slug: doc.group, docs: [doc] })
-  }
-
   return (
-    <div className="space-y-2">
-      {ungrouped.length > 0 && (
-        <ul className="space-y-1">
-          {ungrouped.map((doc) => (
-            <SidebarDocLink key={doc.slug} doc={doc} pathname={pathname} />
-          ))}
-        </ul>
+    <ul className="space-y-1">
+      {nodes.map((node) =>
+        node.kind === "doc" ? (
+          <SidebarDocLink key={node.doc.slug} doc={node.doc} pathname={pathname} depth={depth} />
+        ) : (
+          <SidebarFolder key={node.path} node={node} pathname={pathname} depth={depth} />
+        ),
       )}
-      {groups.map((g) => (
-        <SidebarDocGroup key={g.slug} slug={g.slug} docs={g.docs} pathname={pathname} />
-      ))}
-    </div>
+    </ul>
   )
 }
 
-function SidebarDocGroup({
-  slug,
-  docs,
+/** True when the active route is this folder's own page or anything inside it. */
+function containsActive(node: DocNode, pathname: string): boolean {
+  if (node.kind === "doc") return pathname === `/docs/${node.doc.slug}`
+  return (
+    (node.index !== null && pathname === `/docs/${node.index.slug}`) ||
+    node.children.some((child) => containsActive(child, pathname))
+  )
+}
+
+function SidebarFolder({
+  node,
   pathname,
+  depth,
 }: {
-  /** Sub-folder path, used as the heading, the localStorage key and the DOM id. */
-  slug: string
-  docs: DocMeta[]
+  node: Extract<DocNode, { kind: "folder" }>
   pathname: string
+  depth: number
 }) {
-  // Persist expand/collapse across navigations via localStorage.
-  const storageKey = `docs-shell.sidebar-group.${slug}`
+  const hasActive = containsActive(node, pathname)
+
+  // Persist expand / collapse per folder. Keyed by path (stable) rather than
+  // by label, so renaming a folder's index page doesn't reset everyone's
+  // preference. A folder holding the active page starts open regardless.
+  const storageKey = `docs-shell.sidebar-folder.${node.path}`
   const [open, setOpen] = useState<boolean>(() => {
     if (typeof window === "undefined") return true
     const stored = window.localStorage.getItem(storageKey)
     return stored === null ? true : stored === "1"
   })
 
-  // If a doc inside this group is the active route, auto-expand so the user
-  // can see their current page in context.
-  const activeChildSlug = docs.find((d) => pathname === `/docs/${d.slug}`)?.slug
   useEffect(() => {
-    if (activeChildSlug && !open) setOpen(true)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when active route enters this group
-  }, [activeChildSlug])
+    if (hasActive && !open) setOpen(true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the active route enters this folder
+  }, [hasActive])
 
   const toggle = useCallback(() => {
     setOpen((prev) => {
@@ -224,54 +205,109 @@ function SidebarDocGroup({
     })
   }, [storageKey])
 
-  const contentId = `sidebar-group-${slug.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`
+  const contentId = `sidebar-folder-${node.path.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`
+  const indent = { paddingLeft: `${depth * 0.75 + 0.5}rem` }
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={toggle}
-        aria-expanded={open}
-        aria-controls={contentId}
-        className="flex w-full items-center gap-1 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ChevronRight
-          className={`size-3 transition-transform motion-reduce:transition-none ${open ? "rotate-90" : ""}`}
-          aria-hidden="true"
-        />
-        <span>{groupLabel(slug)}</span>
-      </button>
-      {open && (
-        <ul id={contentId} className="space-y-1 mt-1">
-          {docs.map((doc) => (
-            <SidebarDocLink key={doc.slug} doc={doc} pathname={pathname} />
-          ))}
+    <li>
+      <div className="flex items-center gap-0.5" style={indent}>
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={open}
+          aria-controls={contentId}
+          // The chevron alone toggles, so a folder with a landing page can be
+          // opened without navigating and navigated to without collapsing.
+          aria-label={`${open ? "Collapse" : "Expand"} ${node.label}`}
+          className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+        >
+          <ChevronRight
+            className={`size-3.5 transition-transform motion-reduce:transition-none ${open ? "rotate-90" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+        {node.index ? (
+          <Link
+            href={`/docs/${node.index.slug}`}
+            className={`min-w-0 flex-1 truncate rounded-md px-1.5 py-1.5 text-sm transition-colors ${
+              pathname === `/docs/${node.index.slug}`
+                ? "bg-primary/10 font-medium text-foreground"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            }`}
+          >
+            {node.label}
+          </Link>
+        ) : (
+          // A folder with no index page is a heading, not a destination.
+          <button
+            type="button"
+            onClick={toggle}
+            className="min-w-0 flex-1 cursor-pointer truncate rounded-md px-1.5 py-1.5 text-left text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {node.label}
+          </button>
+        )}
+      </div>
+      {open && node.children.length > 0 && (
+        <ul id={contentId} className="mt-1 space-y-1">
+          <SidebarTreeItems nodes={node.children} pathname={pathname} depth={depth + 1} />
         </ul>
       )}
-    </div>
+    </li>
   )
 }
 
-/** `guides/advanced` → `Guides / Advanced`. */
-function groupLabel(slug: string): string {
-  return slug
-    .split("/")
-    .map((part) =>
-      part
-        .split("-")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" "),
-    )
-    .join(" / ")
+/** The list items of a tree level, without the wrapping `<ul>`. */
+function SidebarTreeItems({
+  nodes,
+  pathname,
+  depth,
+}: {
+  nodes: DocNode[]
+  pathname: string
+  depth: number
+}) {
+  return (
+    <>
+      {nodes.map((node) =>
+        node.kind === "doc" ? (
+          <SidebarDocLink key={node.doc.slug} doc={node.doc} pathname={pathname} depth={depth} />
+        ) : (
+          <SidebarFolder key={node.path} node={node} pathname={pathname} depth={depth} />
+        ),
+      )}
+    </>
+  )
 }
 
-/** One doc entry — title follows the active locale when translations exist. */
-function SidebarDocLink({ doc, pathname }: { doc: DocMeta; pathname: string }) {
+/** One doc entry. Title follows the active locale when translations exist. */
+function SidebarDocLink({
+  doc,
+  pathname,
+  depth,
+}: {
+  doc: DocMeta
+  pathname: string
+  depth: number
+}) {
   const { locale } = useLocale()
+  const active = pathname === `/docs/${doc.slug}`
   return (
-    <SidebarLink href={`/docs/${doc.slug}`} active={pathname === `/docs/${doc.slug}`}>
-      {doc.titles?.[locale] ?? doc.title}
-    </SidebarLink>
+    <li>
+      <Link
+        href={`/docs/${doc.slug}`}
+        // Indent tracks depth so nesting is legible without a guide line at
+        // every level; the chevron column is what the extra 1.25rem clears.
+        style={{ paddingLeft: `${depth * 0.75 + 1.75}rem` }}
+        className={`block truncate rounded-md py-1.5 pr-2 text-sm transition-colors ${
+          active
+            ? "bg-primary/10 font-medium text-foreground"
+            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+        }`}
+      >
+        {doc.titles?.[locale] ?? doc.title}
+      </Link>
+    </li>
   )
 }
 
@@ -292,30 +328,5 @@ function SidebarSection({
       </div>
       {children}
     </div>
-  )
-}
-
-function SidebarLink({
-  href,
-  active,
-  children,
-}: {
-  href: string
-  active: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <li>
-      <Link
-        href={href}
-        className={`block text-sm px-2 py-1.5 rounded-md transition-colors ${
-          active
-            ? "bg-primary/10 text-foreground font-medium"
-            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-        }`}
-      >
-        {children}
-      </Link>
-    </li>
   )
 }

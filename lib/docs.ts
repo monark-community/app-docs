@@ -2,12 +2,16 @@
  * Server-side docs loader. Walks the MDX tree under `content/docs/` and
  * turns it into the nav model the shell renders:
  *
- *     content/docs/<section>/[<group>/]<name>.mdx  →  /docs/<section>/[<group>/]<name>
+ *     content/docs/<section>/[<folder>/…]<name>.mdx  →  /docs/<section>/[<folder>/…]<name>
  *
- * The first directory level is a **section** (a header tab); any further
- * nesting is a **group** (a collapsible heading inside the section's
- * sidebar). Locale variants sit beside the canonical file as
+ * The first directory level is a **section** (a header tab); every level
+ * below it is a folder, nested as deeply as the content is, and the sidebar
+ * mirrors that shape. Locale variants sit beside the canonical file as
  * `<name>.<locale>.mdx`.
+ *
+ * A folder's own `_index.mdx` (see the folder-index rule in `walk`) is both
+ * the folder's landing page and the source of its label and sort order, so a
+ * folder is titled by prose rather than by a title-cased directory name.
  *
  * Everything is read from disk at module init and the results are cached for
  * the process — the site is a static export, so this runs at build time and
@@ -27,9 +31,9 @@ import {
   multilocale,
   titleCase,
 } from "@shell/lib/config"
-import type { DocContent, DocMeta, DocSection } from "@shell/lib/types"
+import type { DocContent, DocMeta, DocNode, DocSection } from "@shell/lib/types"
 
-export type { DocMeta, DocSection }
+export type { DocMeta, DocNode, DocSection }
 
 const root = path.join(process.cwd(), DOCS_ROOT)
 
@@ -143,6 +147,112 @@ const docs: DocMeta[] = files
   })
 
 const bySlug = new Map(files.map((f) => [f.meta.slug, f]))
+
+/** `guides/advanced` → `Guides / Advanced`, for a folder with no `_index`. */
+function folderLabel(name: string): string {
+  return titleCase(name)
+}
+
+/**
+ * Build a section's sidebar tree from the slugs under it. Docs sort by their
+ * frontmatter `order` then title, and a folder sorts by its `_index` doc's
+ * order so a folder can be placed among its siblings rather than always after
+ * them. A folder's `_index` is lifted out of its children: it is the folder,
+ * not an entry inside it.
+ */
+function buildTree(sectionDocs: DocMeta[], section: string): DocNode[] {
+  // Every doc's path below the section, e.g. `admin/users` for
+  // `content/docs/user-guide/admin/users.mdx`.
+  const rel = (doc: DocMeta) => doc.slug.split("/").slice(1)
+
+  // A slug is a folder when some other doc lives beneath it: that is what
+  // makes `admin` a folder rather than a page that happens to share a name
+  // with one. Its own doc (the `_index`) becomes the folder's landing page.
+  const isFolder = (slug: string) => sectionDocs.some((d) => d.slug.startsWith(`${slug}/`))
+
+  function nodesUnder(prefix: string[]): DocNode[] {
+    const depth = prefix.length
+    const nodes: DocNode[] = []
+    const seenDirs = new Set<string>()
+
+    for (const doc of sectionDocs) {
+      const parts = rel(doc)
+      // Only entries that sit directly in this folder.
+      if (parts.length !== depth + 1) continue
+      if (prefix.some((p, i) => parts[i] !== p)) continue
+
+      const name = parts[depth] as string
+      const path = [...prefix, name].join("/")
+      const slug = [section, ...prefix, name].join("/")
+
+      if (isFolder(slug)) {
+        if (seenDirs.has(path)) continue
+        seenDirs.add(path)
+        nodes.push({
+          kind: "folder",
+          label: doc.title,
+          path,
+          index: doc,
+          children: nodesUnder([...prefix, name]),
+        })
+      } else {
+        nodes.push({ kind: "doc", doc })
+      }
+    }
+
+    // A folder with no `_index.mdx` has no doc to be discovered through, so
+    // collect those separately and title them from the directory name.
+    for (const doc of sectionDocs) {
+      const parts = rel(doc)
+      if (parts.length <= depth + 1) continue
+      if (prefix.some((p, i) => parts[i] !== p)) continue
+      const name = parts[depth] as string
+      const path = [...prefix, name].join("/")
+      if (seenDirs.has(path)) continue
+      seenDirs.add(path)
+      nodes.push({
+        kind: "folder",
+        label: folderLabel(name),
+        path,
+        index: null,
+        children: nodesUnder([...prefix, name]),
+      })
+    }
+
+    // Docs sort by frontmatter `order` then title; a folder sorts by its
+    // `_index`'s order, so it can be placed among its siblings rather than
+    // always after them.
+    const weight = (n: DocNode) => (n.kind === "doc" ? n.doc.order : (n.index?.order ?? 999))
+    const label = (n: DocNode) => (n.kind === "doc" ? n.doc.title : n.label)
+    return nodes.sort((a, b) => weight(a) - weight(b) || label(a).localeCompare(label(b)))
+  }
+
+  return nodesUnder([])
+}
+
+const trees = new Map<string, DocNode[]>()
+
+/** A section's sidebar tree, mirroring its folder structure on disk. */
+export function getDocTree(section: string): DocNode[] {
+  let tree = trees.get(section)
+  if (!tree) {
+    tree = buildTree(docs.filter((d) => d.section === section), section)
+    trees.set(section, tree)
+  }
+  return tree
+}
+
+/**
+ * The sidebar's trees, keyed by section dir (plus `""` for docs sitting at the
+ * root of the content tree). Both layouts that mount a sidebar need the same
+ * shape, and building it here keeps the filesystem walk on the server: the
+ * client component is handed something it can render directly.
+ */
+export function getSidebarTrees(sections: { dir: string }[]): Record<string, DocNode[]> {
+  const trees: Record<string, DocNode[]> = { "": getDocTree("") }
+  for (const section of sections) trees[section.dir] = getDocTree(section.dir)
+  return trees
+}
 
 export function getSections(): DocSection[] {
   return sections

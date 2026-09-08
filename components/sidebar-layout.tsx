@@ -3,14 +3,14 @@
 import { Sidebar } from "@shell/components/sidebar"
 import { useMobileSidebar } from "@shell/components/sidebar-provider"
 import { useActiveSection } from "@shell/hooks/use-active-section"
-import type { DocMeta, DocSection } from "@shell/lib/types"
+import type { DocNode, DocSection } from "@shell/lib/types"
 
 export function SidebarLayout({
-  docs,
+  trees,
   sections,
   children,
 }: {
-  docs: DocMeta[]
+  trees: Record<string, DocNode[]>
   sections: DocSection[]
   children: React.ReactNode
 }) {
@@ -22,7 +22,7 @@ export function SidebarLayout({
       {/* Desktop-only; the mobile floating card is mounted once from the root
           layout so the hamburger menu works on every page (homepage included). */}
       <Sidebar
-        docs={docs}
+        trees={trees}
         sections={sections}
         open={open}
         onClose={close}

@@ -8,7 +8,7 @@ import { A11yProvider } from "@shell/components/a11y-provider"
 import { NavigationProgress } from "@shell/components/navigation-progress"
 import { NavDataProvider } from "@shell/components/nav-data-provider"
 import { GlobalMobileSidebar } from "@shell/components/global-mobile-sidebar"
-import { getAllDocs, getSections } from "@shell/lib/docs"
+import { getAllDocs, getSections, getSidebarTrees } from "@shell/lib/docs"
 import { getGithubStars } from "@shell/lib/github"
 import { branding } from "@shell/lib/branding"
 import { extraTranslations } from "@shell/lib/config"
@@ -89,7 +89,7 @@ export default async function RootLayout({
                 {/* Mobile-only sidebar mounted here so the hamburger menu works
                     on every page (including the homepage). The docs layout
                     still mounts its own desktop-only Sidebar via SidebarLayout. */}
-                <GlobalMobileSidebar docs={docs} sections={sections} />
+                <GlobalMobileSidebar trees={getSidebarTrees(sections)} sections={sections} />
                 {children}
               </SidebarProvider>
             </NavDataProvider>

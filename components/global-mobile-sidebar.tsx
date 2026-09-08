@@ -2,7 +2,7 @@
 
 import { Sidebar } from "@shell/components/sidebar"
 import { useMobileSidebar } from "@shell/components/sidebar-provider"
-import type { DocMeta, DocSection } from "@shell/lib/types"
+import type { DocNode, DocSection } from "@shell/lib/types"
 
 /**
  * Client-side wrapper that mounts the mobile-only variant of the Sidebar from
@@ -15,12 +15,12 @@ import type { DocMeta, DocSection } from "@shell/lib/types"
  * exists purely to bridge the server `RootLayout` to those hooks.
  */
 export function GlobalMobileSidebar({
-  docs,
+  trees,
   sections,
 }: {
-  docs: DocMeta[]
+  trees: Record<string, DocNode[]>
   sections: DocSection[]
 }) {
   const { open, close } = useMobileSidebar()
-  return <Sidebar docs={docs} sections={sections} open={open} onClose={close} display="mobile" />
+  return <Sidebar trees={trees} sections={sections} open={open} onClose={close} display="mobile" />
 }
