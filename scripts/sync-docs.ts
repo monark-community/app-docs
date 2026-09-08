@@ -18,7 +18,9 @@
  *   - writes `<section>/<name>.mdx`.
  *
  * Generated output is committed so the site builds from a clean checkout
- * without needing the source repo present.
+ * without needing the source repo present. That covers the copied figures
+ * too: `pnpm build` does not run this script, so an image the committed MDX
+ * references has to be committed with it or the page ships a broken <img>.
  */
 import fs from "node:fs"
 import path from "node:path"

@@ -50,6 +50,12 @@ scripts/                ← sync-docs, generate-search-index
 pointing back at the Markdown it came from. Edit the prose in `monark-community/app` and re-run
 the sync; don't edit the MDX here.
 
+Figures work the same way: `pnpm sync:docs` copies the source repo's `docs/assets/` into
+`public/docs-assets/` and rewrites the image links to point there. Both the MDX and the images
+are **committed**, so the site builds from a clean checkout without the source repo present —
+`pnpm build` does not run the sync, so anything the committed content references has to be
+committed alongside it.
+
 `pnpm sync:docs` maps the source repo like this:
 
 | Source | Section |

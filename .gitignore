@@ -11,10 +11,6 @@ public/api/
 # locally: `pnpm sync:docs --source .app-source`).
 .app-source/
 
-# Doc figures, copied from the source repo by `pnpm sync:docs` alongside the
-# MDX. Generated like content/docs is, but binary, so it is not committed :
-# the sync (locally or in CI) puts them back before a build.
-public/docs-assets/
 
 .env*
 .DS_Store
