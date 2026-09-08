@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@shell/components/shell-ui/dialog"
 import { useTranslations } from "@shell/lib/i18n"
+import { useNavData } from "@shell/components/nav-data-provider"
 
 export interface SearchItem {
   /** Heading text, or the page title for a page's opening record. */
@@ -83,6 +84,31 @@ function preloadSearchIndex() {
     .catch(() => {})
 }
 
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`inline-flex cursor-pointer items-center rounded-full border px-2.5 py-1 text-xs transition-colors ${
+        active
+          ? "border-primary/40 bg-primary/10 text-foreground"
+          : "border-border text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export function SearchTrigger() {
   return <SearchDialog />
 }
@@ -90,10 +116,13 @@ export function SearchTrigger() {
 function SearchDialog() {
   const router = useRouter()
   const t = useTranslations()
+  const navData = useNavData()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [items, setItems] = useState<SearchItem[]>([])
   const [loading, setLoading] = useState(false)
+  /** Section to narrow to, or null for all of them. */
+  const [section, setSection] = useState<string | null>(null)
 
   // Preload search index on mount (fires on page load)
   useEffect(() => {
@@ -135,6 +164,12 @@ function SearchDialog() {
     [router]
   )
 
+  // A filter left on from last time would silently hide results from a
+  // search the user hasn't run yet, so it doesn't outlive the dialog.
+  useEffect(() => {
+    if (!open) setSection(null)
+  }, [open])
+
   // Rank in the component rather than letting cmdk fuzzy-match: cmdk scores a
   // single `value` string, and putting a section's prose in that value makes
   // every long section match everything. `shouldFilter={false}` below hands
@@ -155,7 +190,19 @@ function SearchDialog() {
         // into a scroll marathon.
         .slice(0, 40)
 
-  const groups = hits.reduce<Record<string, Hit[]>>((acc, hit) => {
+  // Counts come from the unfiltered hits: a chip has to say how many results
+  // it would show, including the sections you are not currently looking at.
+  const counts = hits.reduce<Record<string, number>>((acc, hit) => {
+    acc[hit.item.group] = (acc[hit.item.group] ?? 0) + 1
+    return acc
+  }, {})
+  // Section order follows the header tabs rather than hit order, so the chips
+  // don't reshuffle as you type.
+  const sectionOrder = (navData?.sections ?? []).map((s) => s.label)
+  const availableSections = sectionOrder.filter((label) => counts[label])
+
+  const visible = section ? hits.filter((h) => h.item.group === section) : hits
+  const groups = visible.reduce<Record<string, Hit[]>>((acc, hit) => {
     ;(acc[hit.item.group] ??= []).push(hit)
     return acc
   }, {})
@@ -213,6 +260,33 @@ function SearchDialog() {
                 <X className="size-4" />
               </button>
             </div>
+            {/* Section filter. Only shown once a query has produced hits in more
+                than one section : with nothing to choose between, a row of
+                chips is furniture. */}
+            {availableSections.length > 1 && (
+              <div
+                role="group"
+                aria-label={t("search.filterBySection")}
+                className="flex flex-wrap items-center gap-1 border-b px-3 py-2"
+              >
+                <FilterChip active={section === null} onClick={() => setSection(null)}>
+                  {t("search.allSections")}
+                  <span className="ml-1 opacity-60 tabular-nums">{hits.length}</span>
+                </FilterChip>
+                {availableSections.map((label) => (
+                  <FilterChip
+                    key={label}
+                    active={section === label}
+                    // Clicking the active chip clears it, so the filter is
+                    // reversible without hunting for "All".
+                    onClick={() => setSection(section === label ? null : label)}
+                  >
+                    {label}
+                    <span className="ml-1 opacity-60 tabular-nums">{counts[label]}</span>
+                  </FilterChip>
+                ))}
+              </div>
+            )}
             <Command.List className="max-h-80 max-md:max-h-none max-md:flex-1 overflow-y-auto p-1" aria-busy={loading} aria-live="polite">
               {loading ? (
                 <div className="py-6 text-center text-sm text-muted-foreground" role="status">

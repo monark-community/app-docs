@@ -33,6 +33,8 @@ const translations = {
     // Search
     "search.placeholder": "Search documentation and components...",
     "search.noResults": "No results found.",
+    "search.filterBySection": "Filter by section",
+    "search.allSections": "All",
     "search.groupDocs": "Documentation",
     "search.groupComponents": "Components",
 
@@ -291,6 +293,8 @@ const translations = {
     // Search
     "search.placeholder": "Rechercher dans la documentation et les composants...",
     "search.noResults": "Aucun résultat trouvé.",
+    "search.filterBySection": "Filtrer par section",
+    "search.allSections": "Toutes",
     "search.groupDocs": "Documentation",
     "search.groupComponents": "Composants",
 
