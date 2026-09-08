@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { BookOpen, Component, Search, X } from "lucide-react"
+import { BookOpen, Search, X } from "lucide-react"
 import { Command } from "cmdk"
 import { Button } from "@shell/components/shell-ui/button"
 import {
@@ -13,9 +13,62 @@ import {
 import { useTranslations } from "@shell/lib/i18n"
 
 export interface SearchItem {
+  /** Heading text, or the page title for a page's opening record. */
   label: string
+  /** Page title, shown under the label so a section hit says where it lives. */
+  page: string
   href: string
   group: string
+  /** Prose under the heading. Matched against, and excerpted in the result. */
+  text: string
+}
+
+/** A matched record plus what to show for it. */
+interface Hit {
+  item: SearchItem
+  score: number
+  /** Excerpt around the match, when the match was in the body rather than the title. */
+  excerpt: string | null
+}
+
+/**
+ * Rank a record against the query's terms. Every term has to appear somewhere
+ * (label, page or text) for the record to survive; where they appear decides
+ * the order, so a heading called "Recovery codes" beats a page that merely
+ * mentions them in passing.
+ */
+function scoreItem(item: SearchItem, terms: string[]): number | null {
+  const label = item.label.toLowerCase()
+  const page = item.page.toLowerCase()
+  const text = item.text.toLowerCase()
+  let score = 0
+  for (const term of terms) {
+    if (label.startsWith(term)) score += 12
+    else if (label.includes(term)) score += 8
+    else if (page.includes(term)) score += 4
+    else if (text.includes(term)) score += 2
+    else return null
+  }
+  // A whole-phrase hit in a heading is a stronger signal than the same words
+  // scattered across one.
+  const phrase = terms.join(" ")
+  if (terms.length > 1 && label.includes(phrase)) score += 6
+  return score
+}
+
+/** A window of body text around the first matching term, for context. */
+function excerptFor(text: string, terms: string[]): string | null {
+  if (!text) return null
+  const lower = text.toLowerCase()
+  let at = -1
+  for (const term of terms) {
+    const i = lower.indexOf(term)
+    if (i >= 0 && (at === -1 || i < at)) at = i
+  }
+  if (at === -1) return null
+  const start = Math.max(0, at - 40)
+  const end = Math.min(text.length, at + 120)
+  return `${start > 0 ? "…" : ""}${text.slice(start, end).trim()}${end < text.length ? "…" : ""}`
 }
 
 // Module-level cache — survives re-renders, shared across mounts
@@ -82,8 +135,28 @@ function SearchDialog() {
     [router]
   )
 
-  const groups = items.reduce<Record<string, SearchItem[]>>((acc, item) => {
-    ;(acc[item.group] ??= []).push(item)
+  // Rank in the component rather than letting cmdk fuzzy-match: cmdk scores a
+  // single `value` string, and putting a section's prose in that value makes
+  // every long section match everything. `shouldFilter={false}` below hands
+  // filtering here, where a title hit can outrank a body hit.
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean)
+  const hits: Hit[] = terms.length === 0
+    ? []
+    : items
+        .map((item) => {
+          const score = scoreItem(item, terms)
+          return score === null
+            ? null
+            : { item, score, excerpt: excerptFor(item.text, terms) }
+        })
+        .filter((h): h is Hit => h !== null)
+        .sort((a, b) => b.score - a.score || a.item.label.localeCompare(b.item.label))
+        // Enough to cover a section thoroughly without turning the palette
+        // into a scroll marathon.
+        .slice(0, 40)
+
+  const groups = hits.reduce<Record<string, Hit[]>>((acc, hit) => {
+    ;(acc[hit.item.group] ??= []).push(hit)
     return acc
   }, {})
 
@@ -121,6 +194,7 @@ function SearchDialog() {
           <Command
             className="flex flex-col h-full [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium"
             loop
+            shouldFilter={false}
           >
             <div className="flex items-center border-b px-3">
               <Search className="mr-2 size-4 shrink-0 opacity-50" />
@@ -149,25 +223,35 @@ function SearchDialog() {
                 {t("search.noResults")}
               </Command.Empty>
               )}
-              {Object.entries(groups).map(([group, groupItems]) => {
-                const Icon =
-                  group === "Documentation" ? BookOpen : Component
-                return (
-                  <Command.Group key={group} heading={group}>
-                    {groupItems.map((item) => (
-                      <Command.Item
-                        key={item.href}
-                        value={`${item.group} ${item.label}`}
-                        onSelect={() => onSelect(item.href)}
-                        className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
-                      >
-                        <Icon className="size-4 shrink-0 text-muted-foreground" />
-                        {item.label}
-                      </Command.Item>
-                    ))}
-                  </Command.Group>
-                )
-              })}
+              {Object.entries(groups).map(([group, groupHits]) => (
+                <Command.Group key={group} heading={group}>
+                  {groupHits.map(({ item, excerpt }) => (
+                    <Command.Item
+                      key={item.href}
+                      value={item.href}
+                      onSelect={() => onSelect(item.href)}
+                      className="relative flex cursor-pointer select-none items-start gap-2 rounded-sm px-2 py-2 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+                    >
+                      <BookOpen className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate">
+                          {item.label}
+                          {/* The page is only worth naming when the hit is a
+                              section of it, not the page itself. */}
+                          {item.label !== item.page && (
+                            <span className="ml-1.5 text-xs text-muted-foreground">{item.page}</span>
+                          )}
+                        </span>
+                        {excerpt && (
+                          <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                            {excerpt}
+                          </span>
+                        )}
+                      </span>
+                    </Command.Item>
+                  ))}
+                </Command.Group>
+              ))}
             </Command.List>
           </Command>
         </DialogContent>
