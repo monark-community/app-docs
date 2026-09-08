@@ -1,0 +1,36 @@
+"use client"
+
+import { Sidebar } from "@shell/components/sidebar"
+import { useMobileSidebar } from "@shell/components/sidebar-provider"
+import { useActiveSection } from "@shell/hooks/use-active-section"
+import type { DocMeta, DocSection } from "@shell/lib/types"
+
+export function SidebarLayout({
+  docs,
+  sections,
+  children,
+}: {
+  docs: DocMeta[]
+  sections: DocSection[]
+  children: React.ReactNode
+}) {
+  const { open, close, collapsed } = useMobileSidebar()
+  const activeSection = useActiveSection(sections)
+
+  return (
+    <div className="flex">
+      {/* Desktop-only; the mobile floating card is mounted once from the root
+          layout so the hamburger menu works on every page (homepage included). */}
+      <Sidebar
+        docs={docs}
+        sections={sections}
+        open={open}
+        onClose={close}
+        collapsed={collapsed}
+        activeSection={activeSection}
+        display="desktop"
+      />
+      <main id="main-content" tabIndex={-1} className="flex-1 min-w-0 outline-none">{children}</main>
+    </div>
+  )
+}

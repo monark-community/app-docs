@@ -1,0 +1,122 @@
+/**
+ * Brand layer — imported at the END of the shell's globals.css, so these
+ * token values win the cascade against the shell's defaults. Copied from
+ * Monark UI so the docs site and the component library read as one product.
+ *
+ * This file plus `docs.config.ts` and `public/` (favicons, OG image) is the
+ * whole white-label surface: rebranding never touches a component.
+ *
+ * Spec:
+ *   Style          new-york (shadcn)
+ *   Base color     zinc
+ *   Theme          orange
+ *   Chart color    orange
+ *   Radius         medium (0.5rem)
+ *   Heading font   Nunito Sans
+ *   Body font      Nunito Sans
+ *   Icon library   Lucide
+ *   Menu           translucent
+ *   Menu accent    subtle
+ *   Primitive base Radix UI
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
+
+:root {
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono", monospace;
+
+  /* Radius: medium */
+  --radius: 0.5rem;
+
+  /* Base: zinc / Theme: orange — LIGHT */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.723 0.168 59.48); /* #F0870C */
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.723 0.168 59.48);
+
+  /* Chart palette: brand orange anchor + coral + gold (warm) + teal + indigo (cool) */
+  --chart-1: oklch(0.723 0.168 59.48);  /* #F0870C brand */
+  --chart-2: oklch(0.66 0.18 30);       /* #EC5D4B coral */
+  --chart-3: oklch(0.78 0.15 95);       /* #D6B529 gold */
+  --chart-4: oklch(0.63 0.12 200);      /* #009EA6 teal */
+  --chart-5: oklch(0.55 0.14 275);      /* #5B67C2 indigo */
+
+  /* Sidebar — translucent menu, subtle accent */
+  --sidebar: oklch(0.985 0 0 / 0.85);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: oklch(0.723 0.168 59.48);
+  --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.723 0.168 59.48);
+}
+
+.dark {
+  /* Base: zinc / Theme: orange — DARK */
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.723 0.168 59.48); /* #F0870C */
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 0.1);
+  --input: oklch(1 0 0 / 0.15);
+  --ring: oklch(0.723 0.168 59.48);
+
+  --chart-1: oklch(0.723 0.168 59.48);  /* #F0870C brand */
+  --chart-2: oklch(0.66 0.18 30);       /* #EC5D4B coral */
+  --chart-3: oklch(0.78 0.15 95);       /* #D6B529 gold */
+  --chart-4: oklch(0.63 0.12 200);      /* #009EA6 teal */
+  --chart-5: oklch(0.55 0.14 275);      /* #5B67C2 indigo */
+
+  /* Translucent dark sidebar */
+  --sidebar: oklch(0.21 0.006 285.885 / 0.85);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.723 0.168 59.48);
+  --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 0.1);
+  --sidebar-ring: oklch(0.723 0.168 59.48);
+}
+
+/**
+ * Font override — the shell applies next/font's generated class to <body>
+ * which sets `--font-sans` at class-level specificity (beats :root). Force
+ * it with !important on body to win the cascade; everything downstream
+ * uses this via Tailwind's default-font-family theme setting.
+ */
+body {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}

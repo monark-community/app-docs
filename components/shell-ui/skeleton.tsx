@@ -1,0 +1,18 @@
+import { cn } from "@shell/lib/utils"
+
+/** A pulsing placeholder used to indicate loading content. */
+function Skeleton({
+  /** Additional CSS classes to apply to the skeleton. */
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="skeleton"
+      className={cn("animate-pulse rounded-md bg-accent", className)}
+      {...props}
+    />
+  )
+}
+
+export { Skeleton }

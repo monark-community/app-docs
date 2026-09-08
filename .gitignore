@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Generated at build time from content/docs by `pnpm generate:search-index`.
+public/api/
+
+.env*
+.DS_Store

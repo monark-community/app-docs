@@ -1,0 +1,5 @@
+/* Brand layer. Imported LAST from globals.css so `:root` / `.dark` token
+ * overrides in `styles/theme.css` cascade-win over the shell defaults. This
+ * indirection is the white-label seam: rebranding means editing
+ * `styles/theme.css`, never the shell's own stylesheet. */
+@import "../styles/theme.css";
