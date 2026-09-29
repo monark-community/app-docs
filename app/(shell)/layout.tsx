@@ -9,7 +9,6 @@ import { NavigationProgress } from "@shell/components/navigation-progress"
 import { NavDataProvider } from "@shell/components/nav-data-provider"
 import { GlobalMobileSidebar } from "@shell/components/global-mobile-sidebar"
 import { getAllDocs, getSections, getSidebarTrees } from "@shell/lib/docs"
-import { getGithubStars } from "@shell/lib/github"
 import { branding } from "@shell/lib/branding"
 import { extraTranslations } from "@shell/lib/config"
 import { getShellDefaultLocale, getShellLocales } from "@shell/lib/locales"
@@ -66,9 +65,6 @@ export default async function RootLayout({
 }>) {
   const docs = getAllDocs()
   const sections = getSections()
-  // Fetched at build time. Returns null on failure → header shows the GitHub
-  // icon without a count.
-  const githubStars = await getGithubStars()
 
   return (
     <html lang={shellDefaultLocale} suppressHydrationWarning>
@@ -85,7 +81,7 @@ export default async function RootLayout({
               <SidebarProvider>
                 <NavigationProgress />
                 <A11yProvider />
-                <Header githubStars={githubStars} />
+                <Header />
                 {/* Mobile-only sidebar mounted here so the hamburger menu works
                     on every page (including the homepage). The docs layout
                     still mounts its own desktop-only Sidebar via SidebarLayout. */}

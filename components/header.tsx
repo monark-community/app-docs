@@ -2,17 +2,7 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@shell/components/shell-ui/breadcrumb"
-import { Badge } from "@shell/components/shell-ui/badge"
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
-import { Github, Menu, Star } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { Button } from "@shell/components/shell-ui/button"
 import { LocaleToggle } from "@shell/components/locale-toggle"
 import { ThemeToggle } from "@shell/components/theme-toggle"
@@ -20,10 +10,38 @@ import { SearchTrigger } from "@shell/components/search"
 import { useMobileSidebar } from "@shell/components/sidebar-provider"
 import { useNavData } from "@shell/components/nav-data-provider"
 import { useActiveSection, type ActiveSection } from "@shell/hooks/use-active-section"
-import { GITHUB_URL, formatStarCount } from "@shell/lib/github"
 import { branding } from "@shell/lib/branding"
+import { cn } from "@shell/lib/utils"
 
-function HeaderTab({
+/**
+ * The Monark product brand (brand guidelines §2): the colour butterfly mark,
+ * a 10px gap, then the product name. No "by Monark" here.
+ */
+function Brand() {
+  return (
+    <Link
+      href="/"
+      aria-label="Monark docs: home"
+      className="flex shrink-0 items-center gap-2.5 rounded-md py-1 pr-1 whitespace-nowrap"
+    >
+      <Image
+        src="/brand/monark-mark.svg"
+        alt=""
+        width={28}
+        height={28}
+        unoptimized
+        priority
+        className="size-7"
+      />
+      <span className="text-lg leading-none font-extrabold tracking-[-0.02em] text-foreground">
+        {branding.shortName}
+      </span>
+    </Link>
+  )
+}
+
+/** A section link: muted, the active section in foreground (brand guidelines §10). */
+function NavLink({
   href,
   active,
   children,
@@ -35,30 +53,31 @@ function HeaderTab({
   return (
     <Link
       href={href}
-      className={`relative px-3 py-1.5 text-sm font-medium transition-colors ${
-        active
-          ? "text-foreground"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "inline-flex h-9 items-center rounded-md px-2 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
+        active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+      )}
     >
       {children}
-      {active && (
-        <span className="absolute -bottom-3.25 left-0 right-0 h-0.5 bg-primary" />
-      )}
     </Link>
   )
 }
 
-export function Header({ githubStars }: { githubStars?: number | null } = {}) {
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  const { open: sidebarOpen, toggle, collapsed } = useMobileSidebar()
+/**
+ * Standard Monark shell header (brand guidelines §10):
+ * [mark] Docs  Section  Section  Section            [Search] (EN|FR) (☾)
+ * Below `md`: the brand and a menu button only; the menu opens the docs nav,
+ * which also carries search and the theme toggle.
+ */
+export function Header() {
+  const { open: sidebarOpen, toggle } = useMobileSidebar()
 
   const navData = useNavData()
   const sections = navData?.sections ?? []
   const activeSection: ActiveSection = useActiveSection(sections)
-  // Each tab lands on its section's first doc — the sidebar then takes over.
-  const sectionTabs = sections
+  // Each link lands on its section's first doc — the sidebar then takes over.
+  const sectionLinks = sections
     .map((section) => ({
       section,
       firstSlug: navData?.docs.find((d) => d.section === section.dir)?.slug,
@@ -67,121 +86,49 @@ export function Header({ githubStars }: { githubStars?: number | null } = {}) {
       Boolean(t.firstSlug),
     )
 
-  // Standard hydration mount detection. (See the note in a11y-provider
-  // about the upstream react-hooks v6 directive.)
-  useEffect(() => setMounted(true), [])
-
-  const faviconSrc = mounted
-    ? resolvedTheme === "dark"
-      ? branding.faviconLight
-      : branding.faviconDark
-    : branding.faviconDark
-
   return (
-    <header className="h-14 border-b border-border sticky top-0 z-30 bg-background">
-      <div className="relative flex items-center justify-between h-full px-4 md:px-6">
-        {/* Left: hamburger + breadcrumb (fixed-width container so absolute-centered tabs don't shift) */}
-        <div className="flex items-center gap-2 md:w-80 md:shrink-0 min-w-0">
-          {/* Hamburger — always takes space on mobile for consistent brand position */}
-          <div
-            className={`md:overflow-hidden md:transition-all md:duration-300 md:ease-in-out motion-reduce:transition-none ${
-              collapsed ? "md:w-9 md:opacity-100" : "md:w-0 md:opacity-0"
-            }`}
-          >
-            <Button
-              variant={sidebarOpen ? "default" : "ghost"}
-              size="icon"
-              onClick={toggle}
-              aria-label="Toggle menu"
-              aria-expanded={sidebarOpen}
-            >
-              <Menu className="size-4" />
-            </Button>
-          </div>
+    <header className="sticky top-0 z-30 h-16 border-b border-border bg-background/90 backdrop-blur-md">
+      <div className="flex h-full items-center px-4 md:px-6">
+        <Brand />
 
-          <Breadcrumb className="min-w-0">
-            <BreadcrumbList className="flex-nowrap gap-1.5 sm:gap-2 text-sm">
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="flex items-center gap-2 hover:no-underline">
-                  <Image
-                    src={faviconSrc}
-                    alt={`${branding.logoAlt} logo`}
-                    width={22}
-                    height={22}
-                  />
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="font-medium hover:no-underline">
-                  {branding.shortName}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <span id="header-breadcrumb" className="contents" />
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-
-        {/* Center: section tabs — absolutely centered, independent of breadcrumb width */}
-        {navData && (
-          <nav
-            aria-label="Sections"
-            className="hidden md:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 h-full"
-          >
-            {sectionTabs.map(({ section, firstSlug }) => (
-              <HeaderTab
-                key={section.dir}
-                href={`/docs/${firstSlug}`}
-                active={activeSection === section.dir}
-              >
-                {section.label}
-              </HeaderTab>
-            ))}
+        {/* Links: 28px after the brand (20px margin + the link's own 8px padding). */}
+        {sectionLinks.length > 0 && (
+          <nav aria-label="Sections" className="ml-5 hidden md:block">
+            <ul className="flex items-center gap-1.5">
+              {sectionLinks.map(({ section, firstSlug }) => (
+                <li key={section.dir}>
+                  <NavLink
+                    href={`/docs/${firstSlug}`}
+                    active={activeSection === section.dir}
+                  >
+                    {section.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
           </nav>
         )}
 
-        <div className="flex items-center gap-1">
-          {/* GitHub button — rendered only when the registry config provides
-              a `github` object. Label defaults to "Github" but is overridable
-              (e.g. "Sponsor"). Star count fetches server-side with hourly
-              revalidation, unless the registry opted out via showStars=false. */}
-          {branding.github && (
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-              className="hidden md:inline-flex h-8 px-2.5 gap-1.5 text-xs font-medium"
-            >
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={
-                  typeof githubStars === "number"
-                    ? `${branding.github.label ?? "GitHub"}, ${githubStars} stars`
-                    : branding.github.label ?? "GitHub repository"
-                }
-              >
-                <Github className="size-3.5" />
-                <span>{branding.github.label ?? "Github"}</span>
-                {typeof githubStars === "number" && (
-                  <Badge
-                    variant="secondary"
-                    className="gap-0.5 px-1.5 py-0 h-4 text-[10px] font-mono tabular-nums"
-                  >
-                    {formatStarCount(githubStars)}
-                    <Star className="size-2.5 fill-current" />
-                  </Badge>
-                )}
-              </a>
-            </Button>
-          )}
+        <div className="ml-auto hidden items-center gap-2.5 md:flex">
           <SearchTrigger />
-          {/* Locale + theme switches always visible — small icons fit even on
-              mobile and avoid the indirection of a Settings modal. */}
           <LocaleToggle />
           <ThemeToggle />
         </div>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggle}
+          aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+          aria-expanded={sidebarOpen}
+          className="ml-auto md:hidden"
+        >
+          {sidebarOpen ? (
+            <X className="size-5" aria-hidden="true" />
+          ) : (
+            <Menu className="size-5" aria-hidden="true" />
+          )}
+        </Button>
       </div>
     </header>
   )

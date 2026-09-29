@@ -21,7 +21,7 @@ function createHeading(level: 1 | 2 | 3 | 4 | 5 | 6) {
     if (!headingId) return <Tag {...props}>{children}</Tag>
 
     return (
-      <Tag id={headingId} className="group relative scroll-mt-20" {...props}>
+      <Tag id={headingId} className="group relative scroll-mt-24" {...props}>
         {children}
         <a
           href={`#${headingId}`}
