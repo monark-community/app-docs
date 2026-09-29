@@ -109,11 +109,16 @@ function FilterChip({
   )
 }
 
-export function SearchTrigger() {
-  return <SearchDialog />
+/**
+ * `header`: the desktop search bar, owning the ⌘K shortcut.
+ * `menu`: a full-width button for the mobile nav menu. It has no shortcut, so
+ * the two instances never both answer ⌘K.
+ */
+export function SearchTrigger({ variant = "header" }: { variant?: "header" | "menu" } = {}) {
+  return <SearchDialog variant={variant} />
 }
 
-function SearchDialog() {
+function SearchDialog({ variant }: { variant: "header" | "menu" }) {
   const router = useRouter()
   const t = useTranslations()
   const navData = useNavData()
@@ -130,6 +135,7 @@ function SearchDialog() {
   }, [])
 
   useEffect(() => {
+    if (variant !== "header") return
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
@@ -138,7 +144,7 @@ function SearchDialog() {
     }
     document.addEventListener("keydown", down)
     return () => document.removeEventListener("keydown", down)
-  }, [])
+  }, [variant])
 
   // When dialog opens, use cached data or wait for in-flight fetch
   useEffect(() => {
@@ -209,29 +215,28 @@ function SearchDialog() {
 
   return (
     <>
-      {/* Desktop: full search bar */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="hidden md:inline-flex gap-2 text-muted-foreground font-normal w-56 justify-start"
-        onClick={() => setOpen(true)}
-      >
-        <Search className="size-4" />
-        <span>{t("header.search")}</span>
-        <kbd className="ml-auto pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
-          <span className="text-xs">&#8984;</span>K
-        </kbd>
-      </Button>
-      {/* Mobile: icon only */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden"
-        onClick={() => setOpen(true)}
-        aria-label="Search"
-      >
-        <Search className="size-4" />
-      </Button>
+      {variant === "header" ? (
+        <Button
+          variant="outline"
+          className="gap-2 text-muted-foreground font-normal w-56 justify-start"
+          onClick={() => setOpen(true)}
+        >
+          <Search className="size-4" />
+          <span>{t("header.search")}</span>
+          <kbd className="ml-auto pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+            <span className="text-xs">&#8984;</span>K
+          </kbd>
+        </Button>
+      ) : (
+        <Button
+          variant="outline"
+          className="h-11 flex-1 gap-2 text-muted-foreground font-normal justify-start"
+          onClick={() => setOpen(true)}
+        >
+          <Search className="size-4" />
+          <span>{t("header.search")}</span>
+        </Button>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           className="overflow-hidden p-0 sm:max-w-lg max-md:max-w-full! max-md:h-dvh max-md:rounded-none max-md:border-0 max-md:top-0 max-md:translate-y-0"
