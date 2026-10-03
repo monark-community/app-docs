@@ -26,8 +26,18 @@ export default defineConfig({
 
   // Header tabs, left to right. Each `dir` is a folder under `content/docs/`.
   // A folder that lands there without being declared still renders — it just
-  // sorts last with a title-cased label.
+  // sorts last with a title-cased label. A declared section with no pages yet
+  // shows no tab, so the reader sections can be listed ahead of their content.
   sections: [
+    { dir: "get-started", label: "Get started", icon: "Rocket" },
+    { dir: "use", label: "Use Monark", icon: "BookOpen" },
+    { dir: "administer", label: "Administer", icon: "ShieldCheck" },
+    { dir: "build", label: "Build", icon: "Code2" },
+    { dir: "reference", label: "Reference", icon: "FileText" },
+    { dir: "concepts", label: "Concepts", icon: "Lightbulb" },
+    { dir: "operate", label: "Operate", icon: "Terminal" },
+    { dir: "decisions", label: "Decisions", icon: "Scale" },
+    // Legacy layout, until the migration empties it.
     { dir: "user-guide", label: "User guide", icon: "BookOpen" },
     { dir: "modules", label: "Modules", icon: "Boxes" },
     { dir: "technical-documentation", label: "Technical", icon: "Code2" },

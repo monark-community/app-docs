@@ -39,9 +39,35 @@ interface Mapping {
   kind: "dir" | "glob"
   /** Slugs pinned to the top of the section, in this order, before the rest. */
   pinned?: string[]
+  /**
+   * Also merge each extended module's `packages/<name>/docs/<section>/` into
+   * this section, under a `<name>/` folder. Modules keep their docs in the
+   * package so they leave with it, but a reader finds them next to core.
+   */
+  packages?: boolean
 }
 
+/**
+ * The reader-facing sections, in the order the source repo's docs are being
+ * migrated into (see `.claude/skills/monark-docs` there). Each one publishes
+ * `docs/<section>/` plus every module's `packages/<name>/docs/<section>/`.
+ */
+const READER_SECTIONS = [
+  "get-started",
+  "use",
+  "administer",
+  "build",
+  "reference",
+  "concepts",
+  "operate",
+  "decisions",
+]
+
 const MAPPINGS: Mapping[] = [
+  ...READER_SECTIONS.map(
+    (section): Mapping => ({ from: `docs/${section}`, section, kind: "dir", packages: true }),
+  ),
+  // Legacy layout, published until the migration empties it.
   { from: "docs/user-guide", section: "user-guide", kind: "dir" },
   {
     from: "packages/*/docs/user-guide.md",
@@ -58,10 +84,26 @@ const MAPPINGS: Mapping[] = [
   },
 ]
 
-/** Sections that exist on the site, for resolving cross-section links. */
-const SECTION_OF_SOURCE_DIR: Record<string, string> = {
-  "docs/user-guide": "user-guide",
-  "docs/technical-documentation": "technical-documentation",
+/**
+ * Site route (under `/docs/`) for a source directory, or null when that
+ * directory isn't published. Nested folders map too : `docs/use/data` →
+ * `use/data`, `packages/kanban/docs/use` → `use/kanban`.
+ */
+function siteDirOf(sourceDir: string): string | null {
+  const legacy: Record<string, string> = {
+    "docs/user-guide": "user-guide",
+    "docs/technical-documentation": "technical-documentation",
+  }
+  for (const [prefix, section] of Object.entries(legacy)) {
+    if (sourceDir === prefix || sourceDir.startsWith(`${prefix}/`)) {
+      return section + sourceDir.slice(prefix.length)
+    }
+  }
+  const core = sourceDir.match(/^docs\/([^/]+)(\/.*)?$/)
+  if (core && READER_SECTIONS.includes(core[1] ?? "")) return `${core[1]}${core[2] ?? ""}`
+  const pkg = sourceDir.match(/^packages\/([^/]+)\/docs\/([^/]+)(\/.*)?$/)
+  if (pkg && READER_SECTIONS.includes(pkg[2] ?? "")) return `${pkg[2]}/${pkg[1]}${pkg[3] ?? ""}`
+  return null
 }
 
 const args = process.argv.slice(2)
@@ -136,8 +178,14 @@ function sectionOrder(dir: string, slugs: string[], pinned: string[] = []): Map<
       // A link to a section that has since become a folder points at its
       // landing page (`webhooks/_index.md`) ; the entry it names is the
       // folder, so read the directory rather than the file.
-      const slug =
-        path.basename(target) === "_index" ? path.basename(path.dirname(target)) : path.basename(target)
+      // A module's folder is linked at its source location
+      // (`../../packages/kanban/docs/use/_index.md`) but sits here as `kanban`.
+      const pkg = target.match(/packages\/([^/]+)\/docs\/[^/]+\/_index$/)
+      const slug = pkg
+        ? pkg[1]
+        : path.basename(target) === "_index"
+          ? path.basename(path.dirname(target))
+          : path.basename(target)
       if (slug && slugs.includes(slug) && !order.has(slug)) order.set(slug, next++)
     }
     for (const slug of [...slugs].sort()) if (!order.has(slug)) order.set(slug, next++)
@@ -223,9 +271,9 @@ function rewriteLinks(md: string, fromDir: string): string {
       if (repoRelative.endsWith(".md")) {
         const dir = path.dirname(repoRelative)
         const name = path.basename(repoRelative, ".md")
-        const mapped = SECTION_OF_SOURCE_DIR[dir]
-        // `_index.md` is the section's landing page and answers at the
-        // section's own URL — see the folder-index rule in `lib/docs.ts`.
+        const mapped = siteDirOf(dir)
+        // `_index.md` is the folder's landing page and answers at the
+        // folder's own URL — see the folder-index rule in `lib/docs.ts`.
         if (mapped) {
           return name === "_index"
             ? `](/docs/${mapped}${hash})`
@@ -236,7 +284,7 @@ function rewriteLinks(md: string, fromDir: string): string {
 
       // Directory link: point at the section it maps to, else at GitHub.
       const asDir = repoRelative.replace(/\/$/, "")
-      const mappedDir = SECTION_OF_SOURCE_DIR[asDir]
+      const mappedDir = siteDirOf(asDir)
       if (mappedDir) return `](/docs/${mappedDir}${hash})`
       return `](${SOURCE_REPO_BLOB}/${asDir}${hash})`
     }),
@@ -301,29 +349,40 @@ function collect(mapping: Mapping): SourceDoc[] {
       }))
   }
 
-  const dir = path.join(SOURCE, mapping.from)
-  if (!fs.existsSync(dir)) return []
-
   // Walk, don't list: the source keeps long guides as a folder of focused
   // pages, and the site mirrors that shape (see the tree in lib/docs.ts).
   const out: SourceDoc[] = []
-  const walk = (current: string, relative: string[]) => {
+  // `prefix` is the slug folder a module's pages land under (`kanban/…`) ;
+  // it is not part of the source path.
+  const walk = (from: string, current: string, relative: string[], prefix: string[]) => {
     for (const entry of fs.readdirSync(current, { withFileTypes: true }).sort()) {
       const abs = path.join(current, entry.name)
       if (entry.isDirectory()) {
-        walk(abs, [...relative, entry.name])
+        walk(from, abs, [...relative, entry.name], prefix)
         continue
       }
       if (!entry.name.endsWith(".md")) continue
       out.push({
         file: abs,
-        fromDir: [mapping.from, ...relative].join("/"),
+        fromDir: [from, ...relative].join("/"),
         section: mapping.section,
-        slug: [...relative, path.basename(entry.name, ".md")].join("/"),
+        slug: [...prefix, ...relative, path.basename(entry.name, ".md")].join("/"),
       })
     }
   }
-  walk(dir, [])
+
+  const dir = path.join(SOURCE, mapping.from)
+  if (fs.existsSync(dir)) walk(mapping.from, dir, [], [])
+
+  if (mapping.packages) {
+    const pkgs = path.join(SOURCE, "packages")
+    const names = fs.existsSync(pkgs) ? fs.readdirSync(pkgs).sort() : []
+    for (const name of names) {
+      const from = `packages/${name}/docs/${mapping.section}`
+      const pkgDir = path.join(SOURCE, from)
+      if (fs.existsSync(pkgDir)) walk(from, pkgDir, [], [name])
+    }
+  }
   return out
 }
 
@@ -392,8 +451,16 @@ for (const mapping of MAPPINGS) {
       }
     }
 
+    // Where each slug folder's files really live : a module's `kanban/` folder
+    // reads its `_index.md` from packages/kanban/docs/<section>/, not from
+    // under mapping.from.
+    const sourceDirOf = new Map<string, string>()
+    for (const doc of docs) {
+      sourceDirOf.set(doc.slug.split("/").slice(0, -1).join("/"), path.dirname(doc.file))
+    }
+
     for (const [dir, { files, dirs }] of entries) {
-      const source = path.join(SOURCE, mapping.from, dir)
+      const source = sourceDirOf.get(dir) ?? path.join(SOURCE, mapping.from, dir)
       const names = [...files, ...dirs]
       const resolved = sectionOrder(source, names, dir ? [] : mapping.pinned)
       for (const [name, n] of resolved) {
