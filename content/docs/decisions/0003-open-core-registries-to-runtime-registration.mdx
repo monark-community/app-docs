@@ -14,11 +14,11 @@ Feature flags, permissions and notification kinds started as closed, static list
 
 ## Options
 
-| Option                                                         | For                                                                         | Against                                                                                         |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Keep static lists; modules send a core change for each entry    | Everything visible in one file; typed keys                                   | Every module edits core; the extended tier's promise doesn't hold                               |
-| Generate the lists from each module at build time               | Typed, complete lists with no core edit                                      | Another generator to run and drift-check; descriptions and templates still need a home           |
-| Runtime registries, filled by each module at API boot            | No core edit; one pattern for every registry; admin screens list what's registered | Keys are checked at runtime, not compile time; boot order becomes something to maintain       |
+| Option                                                       | For                                                                                | Against                                                                                 |
+| ------------------------------------------------------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Keep static lists; modules send a core change for each entry | Everything visible in one file; typed keys                                         | Every module edits core; the extended tier's promise doesn't hold                       |
+| Generate the lists from each module at build time            | Typed, complete lists with no core edit                                            | Another generator to run and drift-check; descriptions and templates still need a home  |
+| Runtime registries, filled by each module at API boot        | No core edit; one pattern for every registry; admin screens list what's registered | Keys are checked at runtime, not compile time; boot order becomes something to maintain |
 
 ## Decision
 

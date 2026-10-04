@@ -45,12 +45,12 @@ Because a deployment has [one organization](/docs/concepts/platform-overview#one
 
 ## Account lifecycle
 
-| State           | How it starts                                     | Effect                                                                                                                       |
-| --------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Active          | Sign-up                                           | Normal use.                                                                                                                  |
-| Pending deletion | The user, or an admin, requests deletion          | A 14-day grace period. The user is confined to their account pages, where they can cancel. In-app notifications still arrive; email stops. |
-| Deleted         | The grace period ends                              | A scheduled job removes the account.                                                                                         |
-| Disabled        | An admin lockout, reversible                       | The account's API keys stop working.                                                                                         |
+| State            | How it starts                            | Effect                                                                                                                                     |
+| ---------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Active           | Sign-up                                  | Normal use.                                                                                                                                |
+| Pending deletion | The user, or an admin, requests deletion | A 14-day grace period. The user is confined to their account pages, where they can cancel. In-app notifications still arrive; email stops. |
+| Deleted          | The grace period ends                    | A scheduled job removes the account.                                                                                                       |
+| Disabled         | An admin lockout, reversible             | The account's API keys stop working.                                                                                                       |
 
 Sign-ins, sign-outs, password and email changes, two-factor and device changes, and profile updates all emit domain events, so security notifications, webhooks and automations can react to them. See [Domain events](/docs/reference/events).
 

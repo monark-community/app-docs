@@ -16,9 +16,9 @@ Roles live in the database, not in code. A role belongs to one organization (or,
 
 Two built-in roles short-circuit every check to "yes":
 
-| Role                             | Tier         | Grants                                 | Assigned by                                         |
-| -------------------------------- | ------------ | -------------------------------------- | --------------------------------------------------- |
-| Administrator (`ADMIN`)          | organization | every permission in that organization  | an admin, from the app                              |
+| Role                              | Tier         | Grants                                 | Assigned by                                         |
+| --------------------------------- | ------------ | -------------------------------------- | --------------------------------------------------- |
+| Administrator (`ADMIN`)           | organization | every permission in that organization  | an admin, from the app                              |
 | System Administrator (`SYSADMIN`) | platform     | every permission in every organization | an operator, with a CLI script or SQL; never the UI |
 
 Every other role is a custom role an admin builds under **Roles & permissions** in the admin area, picking permissions from a matrix.
@@ -31,11 +31,11 @@ Write paths check a permission at the top of the server procedure. Comparing rol
 
 Reading a data-model record passes three layers, and all three must agree:
 
-| Layer  | Question                                       | No rule means                       |
-| ------ | ---------------------------------------------- | ----------------------------------- |
-| Model  | May you read this model's records at all?      | denied                              |
-| Record | Is this record restricted to roles you lack?   | open to everyone with model access  |
-| Scope  | Does the record match your role's condition?   | unrestricted                        |
+| Layer  | Question                                     | No rule means                      |
+| ------ | -------------------------------------------- | ---------------------------------- |
+| Model  | May you read this model's records at all?    | denied                             |
+| Record | Is this record restricted to roles you lack? | open to everyone with model access |
+| Scope  | Does the record match your role's condition? | unrestricted                       |
 
 At the model layer, each model gets its own read, write and delete permissions when it's created. A generic version of each (any model) also exists; holding either is enough.
 
@@ -53,13 +53,13 @@ Roles only ever add access. For a given model, your effective scope is the OR of
 
 The scope is AND-ed into the query tree before it is compiled, so it runs through the same compiler as every filter ([Data models and queries](/docs/concepts/data-models-and-queries)). A scope can't mean one thing in a list and another on a direct link:
 
-| Path                                  | How the scope applies                          |
-| ------------------------------------- | ---------------------------------------------- |
-| Record list                           | added to the compiled filter                   |
-| Open, edit, delete, watch a record    | the same compiler run against that one record  |
-| Global search                         | each hit is checked, since search doesn't use the list |
-| Change notifications                  | checked per recipient                          |
-| Public API and MCP                    | inherited; both call the same procedures       |
+| Path                               | How the scope applies                                  |
+| ---------------------------------- | ------------------------------------------------------ |
+| Record list                        | added to the compiled filter                           |
+| Open, edit, delete, watch a record | the same compiler run against that one record          |
+| Global search                      | each hit is checked, since search doesn't use the list |
+| Change notifications               | checked per recipient                                  |
+| Public API and MCP                 | inherited; both call the same procedures               |
 
 A record hidden by any layer answers 404, never 403, so neither its existence nor the shape of the rule leaks.
 

@@ -49,12 +49,12 @@ Sign out and open the sign-in page: it shows your logo, name and tagline on your
 
 ## If something goes wrong
 
-| Symptom                                           | Cause                                                       | Fix                                                                 |
-| ------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------- |
-| Colour ignored, defaults to blue                  | hex value unquoted, so it parsed as empty                   | Quote it: `"#E4572E"`.                                              |
-| Server-rendered text branded, browser text says `App` | `NEXT_PUBLIC_BRANDING_*` missing, or web not redeployed | Set the mirrors and redeploy.                                       |
-| Logo upload fails                                 | `SUPABASE_URL` / `SUPABASE_SECRET_KEY` missing on the web app, or the file is SVG or over 2 MB | Add the variables; use JPEG, PNG or WebP. |
-| Broken image on the sign-in page                  | `BRANDING_LOGO_SRC` points at a missing file                | Add the file under `services/web/public/`.                          |
-| Auth emails still neutral (hosted)                | templates edited only in the repo                           | Copy them into the Supabase dashboard.                              |
+| Symptom                                               | Cause                                                                                          | Fix                                        |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Colour ignored, defaults to blue                      | hex value unquoted, so it parsed as empty                                                      | Quote it: `"#E4572E"`.                     |
+| Server-rendered text branded, browser text says `App` | `NEXT_PUBLIC_BRANDING_*` missing, or web not redeployed                                        | Set the mirrors and redeploy.              |
+| Logo upload fails                                     | `SUPABASE_URL` / `SUPABASE_SECRET_KEY` missing on the web app, or the file is SVG or over 2 MB | Add the variables; use JPEG, PNG or WebP.  |
+| Broken image on the sign-in page                      | `BRANDING_LOGO_SRC` points at a missing file                                                   | Add the file under `services/web/public/`. |
+| Auth emails still neutral (hosted)                    | templates edited only in the repo                                                              | Copy them into the Supabase dashboard.     |
 
 Next: [Turn on error tracking](/docs/operate/turn-on-error-tracking)

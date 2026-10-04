@@ -29,31 +29,31 @@ Whether a feature is core or extended is an engineering fact. Readers find Kanba
 
 Core subsystems:
 
-| Subsystem                 | What it does                                                                                     | Read more                                                         |
-| ------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| Architecture              | Module tiers, boundaries, the event bus, codegen, boot sequence, the web app shell                | [Architecture](/docs/concepts/architecture)                            |
-| Users and authentication  | Accounts, sign-in, two-factor, trusted devices, organization membership                           | [Users and authentication](/docs/concepts/users-and-authentication)           |
-| Permissions               | Roles, granular permissions, and per-record restrictions                                          | [Permissions](/docs/concepts/permissions)                                     |
-| Data models and queries   | Admin-defined databases (models, fields, records) and the query language that filters them        | [Data models and queries](/docs/concepts/data-models-and-queries)             |
-| Automations               | Event-triggered flows built as node graphs and run by a durable worker                            | [Automations](/docs/concepts/automations)                                     |
-| Notifications             | In-app and email messages, with per-user preferences                                              | [Notifications](/docs/concepts/notifications)                                 |
-| Identity and integration  | Webhooks, API keys, service accounts, and the public REST API                                     | [Identity and integration](/docs/concepts/identity-and-integration)           |
-| Secrets                   | A write-only, encrypted store for the credentials integrations use                                | [Secrets](/docs/concepts/secrets)                                             |
-| Chat agent                | The in-app assistant, which acts through the same routes as the public API                        | [Chat agent](/docs/concepts/chat-agent)                                       |
-| Block editor              | The block-based document editor shared by wiki pages, cards and document fields                   | [Block editor](/docs/concepts/block-editor)                                   |
-| Files                     | Signed uploads to private storage, used by file fields                                            | [Files](/docs/concepts/files)                                                 |
-| Feature flags             | Runtime switches resolved per user, role, organization or globally                                | [Feature flags](/docs/reference/feature-flags)                    |
-| Global search             | One command palette that searches every module that registers a source                            | [The extensibility contract](/docs/concepts/architecture/extensibility-contract) |
-| Branding                  | The app name, colours, logo and sender address, set per deployment                                | [Rebrand an instance](/docs/operate/rebrand-an-instance)          |
+| Subsystem                | What it does                                                                               | Read more                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Architecture             | Module tiers, boundaries, the event bus, codegen, boot sequence, the web app shell         | [Architecture](/docs/concepts/architecture)                               |
+| Users and authentication | Accounts, sign-in, two-factor, trusted devices, organization membership                    | [Users and authentication](/docs/concepts/users-and-authentication)              |
+| Permissions              | Roles, granular permissions, and per-record restrictions                                   | [Permissions](/docs/concepts/permissions)                                        |
+| Data models and queries  | Admin-defined databases (models, fields, records) and the query language that filters them | [Data models and queries](/docs/concepts/data-models-and-queries)                |
+| Automations              | Event-triggered flows built as node graphs and run by a durable worker                     | [Automations](/docs/concepts/automations)                                        |
+| Notifications            | In-app and email messages, with per-user preferences                                       | [Notifications](/docs/concepts/notifications)                                    |
+| Identity and integration | Webhooks, API keys, service accounts, and the public REST API                              | [Identity and integration](/docs/concepts/identity-and-integration)              |
+| Secrets                  | A write-only, encrypted store for the credentials integrations use                         | [Secrets](/docs/concepts/secrets)                                                |
+| Chat agent               | The in-app assistant, which acts through the same routes as the public API                 | [Chat agent](/docs/concepts/chat-agent)                                          |
+| Block editor             | The block-based document editor shared by wiki pages, cards and document fields            | [Block editor](/docs/concepts/block-editor)                                      |
+| Files                    | Signed uploads to private storage, used by file fields                                     | [Files](/docs/concepts/files)                                                    |
+| Feature flags            | Runtime switches resolved per user, role, organization or globally                         | [Feature flags](/docs/reference/feature-flags)                       |
+| Global search            | One command palette that searches every module that registers a source                     | [The extensibility contract](/docs/concepts/architecture/extensibility-contract) |
+| Branding                 | The app name, colours, logo and sender address, set per deployment                         | [Rebrand an instance](/docs/operate/rebrand-an-instance)             |
 
 Extended modules:
 
-| Module                                 | What it does                                                        | Read more                                     |
-| -------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------- |
-| Kanban                                 | Boards, columns and cards                                           | [Use Monark](/docs/use)                |
-| Calendar                               | Calendars, events, reminders, and events generated from data models | [Use Monark](/docs/use)                |
-| Wiki                                   | A tree of nested pages                                              | [Use Monark](/docs/use)                |
-| Achievements                           | Badges awarded automatically when events happen                     | [Achievements](/docs/concepts/achievements)               |
+| Module                                 | What it does                                                        | Read more                                                  |
+| -------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Kanban                                 | Boards, columns and cards                                           | [Use Monark](/docs/use)                             |
+| Calendar                               | Calendars, events, reminders, and events generated from data models | [Use Monark](/docs/use)                             |
+| Wiki                                   | A tree of nested pages                                              | [Use Monark](/docs/use)                             |
+| Achievements                           | Badges awarded automatically when events happen                     | [Achievements](/docs/concepts/achievements)                            |
 | GitHub, Telegram, Discord, X (Twitter) | Connect a third-party service to automations                        | [Integration modules](/docs/concepts/architecture/integration-modules) |
 
 ## The pieces that run

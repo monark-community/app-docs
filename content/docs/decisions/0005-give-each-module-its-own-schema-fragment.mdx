@@ -14,11 +14,11 @@ Prisma reads one schema file. Until mid-2026, extended modules such as Calendar 
 
 ## Options
 
-| Option                                                           | For                                                                  | Against                                                                                           |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Keep one hand-edited schema, with banners per module              | No tooling; what Prisma expects                                       | Extended modules edit a core file; the boundary exists only as a comment                         |
-| Prisma's multi-file schema support                                | Native                                                                | Expects the files in one folder, so tables would still live outside their module                  |
-| A fragment per module, assembled into the schema by a generator    | Each module owns its tables and migration; removable with its package | Another generated artifact to keep in sync; core back-relations still point into fragments        |
+| Option                                                          | For                                                                   | Against                                                                                    |
+| --------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Keep one hand-edited schema, with banners per module            | No tooling; what Prisma expects                                       | Extended modules edit a core file; the boundary exists only as a comment                   |
+| Prisma's multi-file schema support                              | Native                                                                | Expects the files in one folder, so tables would still live outside their module           |
+| A fragment per module, assembled into the schema by a generator | Each module owns its tables and migration; removable with its package | Another generated artifact to keep in sync; core back-relations still point into fragments |
 
 ## Decision
 

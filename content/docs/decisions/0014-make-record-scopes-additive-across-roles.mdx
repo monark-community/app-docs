@@ -14,11 +14,11 @@ A record scope limits a role to "the records matching this query" on one data mo
 
 ## Options
 
-| Option                                                           | For                                                       | Against                                                                                                 |
-| ---------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Intersect the scopes of all the user's roles                     | The narrowest result; one scope restricts everyone holding it | Adding a scoped grant to a role can silently take access away from someone who also holds a broader role |
+| Option                                                                | For                                                                   | Against                                                                                                  |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Intersect the scopes of all the user's roles                          | The narrowest result; one scope restricts everyone holding it         | Adding a scoped grant to a role can silently take access away from someone who also holds a broader role |
 | Union per granting role; an unscoped granting role means "everything" | Matches how roles already behave; adding a grant never removes access | One broad role overrides every scope the user also holds                                                 |
-| Let only one role apply (first or highest priority)              | Simple to evaluate                                        | Needs a role priority that doesn't exist; results depend on ordering                                    |
+| Let only one role apply (first or highest priority)                   | Simple to evaluate                                                    | Needs a role priority that doesn't exist; results depend on ordering                                     |
 
 ## Decision
 

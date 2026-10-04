@@ -12,12 +12,12 @@ Get a user back into their account when the in-app recovery paths aren't enough.
 
 Most lockouts don't need you:
 
-| The user lost                     | They recover by                                                                                         |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| their password                    | **Forgot password?** on the sign-in page. If two-factor is on, the reset still asks for a code or a recovery code. |
-| their authenticator               | signing in with their password, then **Use a recovery code**. Each code works once.                     |
-| their authenticator and recovery codes | this runbook                                                                                      |
-| the only administrator account    | this runbook, last section                                                                              |
+| The user lost                          | They recover by                                                                                                    |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| their password                         | **Forgot password?** on the sign-in page. If two-factor is on, the reset still asks for a code or a recovery code. |
+| their authenticator                    | signing in with their password, then **Use a recovery code**. Each code works once.                                |
+| their authenticator and recovery codes | this runbook                                                                                                       |
+| the only administrator account         | this runbook, last section                                                                                         |
 
 Never remove a factor on the strength of an email or chat message alone; an attacker who controls the user's inbox would get the whole account. Prove identity out of band first.
 
@@ -60,10 +60,10 @@ Expect `Granted SYSADMIN to <email> (id=…)`. Revoke it the same way with `revo
 
 ## If something goes wrong
 
-| Symptom                                          | Cause                                              | Fix                                                                  |
-| ------------------------------------------------ | -------------------------------------------------- | -------------------------------------------------------------------- |
-| Step 1 returns no rows                           | wrong email, or two-factor wasn't enrolled         | Search with `WHERE u.email ILIKE '%<part>%'`; without enrollment the user only needs a password reset. |
-| Reset email never arrives                        | mail delivery, not the account                     | Check Supabase's SMTP settings and the provider's logs.              |
-| `sysadmin` fails with `No user matched`          | the account doesn't exist yet                      | Have the person sign up and confirm their email first.               |
+| Symptom                                 | Cause                                      | Fix                                                                                                    |
+| --------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Step 1 returns no rows                  | wrong email, or two-factor wasn't enrolled | Search with `WHERE u.email ILIKE '%<part>%'`; without enrollment the user only needs a password reset. |
+| Reset email never arrives               | mail delivery, not the account             | Check Supabase's SMTP settings and the provider's logs.                                                |
+| `sysadmin` fails with `No user matched` | the account doesn't exist yet              | Have the person sign up and confirm their email first.                                                 |
 
 Next: [Run several instances](/docs/operate/run-several-instances)

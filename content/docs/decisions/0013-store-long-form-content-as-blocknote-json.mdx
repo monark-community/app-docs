@@ -14,11 +14,11 @@ All long-form content used one Tiptap rich-text editor that stored raw HTML, san
 
 ## Options
 
-| Option                                         | For                                                                 | Against                                                                         |
-| ---------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Extend the Tiptap editor with block features   | One editor; no migration                                            | Building drag handles, slash menu and nesting ourselves                         |
-| BlockNote, still storing HTML                  | Block UX with no storage change                                     | Lossy round-trips; keeps the HTML rendering risk                                |
-| BlockNote, storing its JSON blocks             | Block UX out of the box on the same ProseMirror base; lossless; renders as React | Search, titles and indexing must extract text from JSON; existing content must be migrated |
+| Option                                       | For                                                                              | Against                                                                                    |
+| -------------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Extend the Tiptap editor with block features | One editor; no migration                                                         | Building drag handles, slash menu and nesting ourselves                                    |
+| BlockNote, still storing HTML                | Block UX with no storage change                                                  | Lossy round-trips; keeps the HTML rendering risk                                           |
+| BlockNote, storing its JSON blocks           | Block UX out of the box on the same ProseMirror base; lossless; renders as React | Search, titles and indexing must extract text from JSON; existing content must be migrated |
 
 ## Decision
 

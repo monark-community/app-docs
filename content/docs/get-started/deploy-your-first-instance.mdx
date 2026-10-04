@@ -50,13 +50,13 @@ You now have everything the api needs to reach its database.
 1. In Vercel, choose **Add New → Project**, import the repository, and set **Root Directory** to `services/web`.
 2. Add these variables, then click **Deploy**:
 
-   | Key                                    | Value                         |
-   | -------------------------------------- | ----------------------------- |
-   | `NEXT_PUBLIC_API_URL`                  | the staging api URL           |
-   | `NEXT_PUBLIC_APP_URL`                  | `https://example.com` for now |
-   | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_URL` | the Supabase URL          |
-   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | the publishable key           |
-   | `SUPABASE_SECRET_KEY`                  | the secret key                |
+   | Key                                        | Value                         |
+   | ------------------------------------------ | ----------------------------- |
+   | `NEXT_PUBLIC_API_URL`                      | the staging api URL           |
+   | `NEXT_PUBLIC_APP_URL`                      | `https://example.com` for now |
+   | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_URL` | the Supabase URL              |
+   | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`     | the publishable key           |
+   | `SUPABASE_SECRET_KEY`                      | the secret key                |
 
 3. In **Deployments**, create a deployment from the `develop` branch. Its stable URL is `https://<project>-git-develop-<team>.vercel.app`; this is your staging web host.
 4. Set `NEXT_PUBLIC_APP_URL` to that host and redeploy the `develop` deployment.

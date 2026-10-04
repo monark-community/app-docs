@@ -12,10 +12,10 @@ Long-form content in Monark, such as wiki pages, kanban card descriptions and da
 
 ## Two editors, by surface
 
-| Editor                     | Stores           | Used for                                                                 |
-| -------------------------- | ---------------- | ------------------------------------------------------------------------ |
-| Block editor (BlockNote)   | JSON block array | wiki page body, kanban card description and its checklist, data-model document fields |
-| Rich text (Tiptap)         | HTML, sanitized when shown | calendar event description, data-model rich-text fields                  |
+| Editor                   | Stores                     | Used for                                                                              |
+| ------------------------ | -------------------------- | ------------------------------------------------------------------------------------- |
+| Block editor (BlockNote) | JSON block array           | wiki page body, kanban card description and its checklist, data-model document fields |
+| Rich text (Tiptap)       | HTML, sanitized when shown | calendar event description, data-model rich-text fields                               |
 
 Block content renders as React components, never as injected HTML, which removes a whole class of cross-site scripting risk. Why JSON and why both editors stay is recorded in [Store long-form content as BlockNote JSON](/docs/decisions/0013-store-long-form-content-as-blocknote-json).
 

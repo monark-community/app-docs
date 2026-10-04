@@ -16,11 +16,11 @@ The closest tools differ. Unreal Blueprints wires typed data pins, which works b
 
 ## Options
 
-| Option                                                    | For                                                                     | Against                                                                         |
-| --------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Keep both references and data wires as they were          | No migration                                                            | Two incomplete paths; whole-output wires; references unusable for nodes         |
-| Keep data wires as visual sugar that writes a reference   | One runtime path; keeps connect-the-dots                                | A second port type per field to render, hit-test and validate, for nothing the picker lacks |
-| References only, with a picker; remove data wires         | One runtime path and one authoring surface; least clutter               | Loses drawing a data wire; old graphs need migrating                            |
+| Option                                                  | For                                                       | Against                                                                                     |
+| ------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Keep both references and data wires as they were        | No migration                                              | Two incomplete paths; whole-output wires; references unusable for nodes                     |
+| Keep data wires as visual sugar that writes a reference | One runtime path; keeps connect-the-dots                  | A second port type per field to render, hit-test and validate, for nothing the picker lacks |
+| References only, with a picker; remove data wires       | One runtime path and one authoring surface; least clutter | Loses drawing a data wire; old graphs need migrating                                        |
 
 ## Decision
 

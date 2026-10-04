@@ -14,11 +14,11 @@ Modules react to each other through domain events. Some reactions are cheap and 
 
 ## Options
 
-| Option                                                                 | For                                                                    | Against                                                                                                  |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| A persisted bus with a dispatcher and retries for every handler         | Nothing lost, for any subscriber                                       | A write and a queue for every emit; every subscriber must be idempotent; more to run                     |
-| An external broker                                                       | Proven delivery guarantees                                              | A new piece of infrastructure for every deployment, which conflicts with running many small instances    |
-| An in-memory bus; consumers that need durability write their own outbox | Emits stay cheap; durability is paid only where needed                  | Events can be lost between the emit and the outbox write; each durable consumer builds its own outbox     |
+| Option                                                                  | For                                                    | Against                                                                                               |
+| ----------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| A persisted bus with a dispatcher and retries for every handler         | Nothing lost, for any subscriber                       | A write and a queue for every emit; every subscriber must be idempotent; more to run                  |
+| An external broker                                                      | Proven delivery guarantees                             | A new piece of infrastructure for every deployment, which conflicts with running many small instances |
+| An in-memory bus; consumers that need durability write their own outbox | Emits stay cheap; durability is paid only where needed | Events can be lost between the emit and the outbox write; each durable consumer builds its own outbox |
 
 ## Decision
 
