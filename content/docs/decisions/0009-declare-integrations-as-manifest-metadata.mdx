@@ -14,11 +14,11 @@ With GitHub connected to automations and more providers planned (Telegram, Disco
 
 ## Options
 
-| Option                                                           | For                                                         | Against                                                                                         |
-| ---------------------------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| A nested folder, `packages/integrations/<service>`                | Visible grouping                                             | Breaks the path conventions the tooling and TypeScript paths rely on                            |
-| A third tier, "integration"                                      | Explicit in the manifest                                     | New tier rules for something that obeys the extended rules already                              |
-| An `integrates` field on extended modules, plus a shared library | No tooling change; grouping is queryable; plumbing shared    | The grouping is invisible in the file tree                                                       |
+| Option                                                           | For                                                       | Against                                                              |
+| ---------------------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------- |
+| A nested folder, `packages/integrations/<service>`               | Visible grouping                                          | Breaks the path conventions the tooling and TypeScript paths rely on |
+| A third tier, "integration"                                      | Explicit in the manifest                                  | New tier rules for something that obeys the extended rules already   |
+| An `integrates` field on extended modules, plus a shared library | No tooling change; grouping is queryable; plumbing shared | The grouping is invisible in the file tree                           |
 
 ## Decision
 

@@ -12,11 +12,11 @@ Three files in the repository are built from module sources instead of written b
 
 ## The three artifacts
 
-| Artifact                | Built from                                                                                   | Written to                                         | Command            |
-| ----------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------ |
-| Prisma schema           | `packages/db/prisma/base.prisma` (datasource, generator, core models) plus every `packages/<module>/prisma/*.prisma` fragment | `packages/db/prisma/schema.prisma`                 | `pnpm gen:schema`  |
-| `DomainEvent` union     | the `XxxEvents` union in each module's `contracts/events.ts`                                 | `packages/common/src/contracts/events.generated.ts` | `pnpm gen:events`  |
-| tRPC app router         | the router each module exports from `/server`                                                | the API's `app-router.generated.ts`                | `pnpm gen:routers` |
+| Artifact            | Built from                                                                                                                    | Written to                                          | Command            |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | ------------------ |
+| Prisma schema       | `packages/db/prisma/base.prisma` (datasource, generator, core models) plus every `packages/<module>/prisma/*.prisma` fragment | `packages/db/prisma/schema.prisma`                  | `pnpm gen:schema`  |
+| `DomainEvent` union | the `XxxEvents` union in each module's `contracts/events.ts`                                                                  | `packages/common/src/contracts/events.generated.ts` | `pnpm gen:events`  |
+| tRPC app router     | the router each module exports from `/server`                                                                                 | the API's `app-router.generated.ts`                 | `pnpm gen:routers` |
 
 Generating the event union is what lets `emit` and `on` be fully typed without a dependency cycle. A hand-written union in `@monark/common` would have to import every module's contracts, while every module already imports `@monark/common`. The generator breaks that loop: each module owns its event types, and only the generated file sees them all.
 

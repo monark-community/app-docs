@@ -14,11 +14,11 @@ Monark carried two tenancy modes. A `tenancy.multi-tenant` flag, off by default,
 
 ## Options
 
-| Option                                              | For                                                                       | Against                                                                                         |
-| --------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Keep both modes behind the flag                      | Multi-tenancy stays available if a customer ever needs it                 | Two code paths and two admin UIs to maintain and test, one of them never exercised               |
-| Commit to multi-tenancy                              | One deployment serves everyone; cheaper to host many small customers      | Every query, registry, secret and brand setting must be tenant-scoped; data isolation is harder to prove |
-| Commit to single tenancy, one instance per business  | One code path; isolation by separate databases; per-customer branding and upgrades | More instances to run; no cross-organization features                                   |
+| Option                                              | For                                                                                | Against                                                                                                  |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Keep both modes behind the flag                     | Multi-tenancy stays available if a customer ever needs it                          | Two code paths and two admin UIs to maintain and test, one of them never exercised                       |
+| Commit to multi-tenancy                             | One deployment serves everyone; cheaper to host many small customers               | Every query, registry, secret and brand setting must be tenant-scoped; data isolation is harder to prove |
+| Commit to single tenancy, one instance per business | One code path; isolation by separate databases; per-customer branding and upgrades | More instances to run; no cross-organization features                                                    |
 
 ## Decision
 

@@ -18,12 +18,12 @@ Node types come from a registry: any module registers its own at boot, each with
 
 ## Triggers
 
-| Trigger     | Fires when                                                                 |
-| ----------- | -------------------------------------------------------------------------- |
-| Event       | a matching domain event is emitted anywhere in the platform                |
-| Data Record | a record of one chosen data model is created, updated or deleted          |
-| Manual      | someone clicks **Run now**                                                 |
-| HTTP        | an outside system posts to the flow's URL with its secret                  |
+| Trigger     | Fires when                                                                       |
+| ----------- | -------------------------------------------------------------------------------- |
+| Event       | a matching domain event is emitted anywhere in the platform                      |
+| Data Record | a record of one chosen data model is created, updated or deleted                 |
+| Manual      | someone clicks **Run now**                                                       |
+| HTTP        | an outside system posts to the flow's URL with its secret                        |
 | Schedule    | a recurring time comes round (every N minutes, daily, weekly or monthly, in UTC) |
 
 Event triggers listen to every event on the bus except two kinds: automation's own events, so a flow can't re-trigger itself forever, and feature-flag changes, whose target organization can't yet be resolved reliably. An event is matched to organizations by its organization id, else by the acting user's memberships.
@@ -74,11 +74,11 @@ Every run executes as the user who created the flow. Nodes that change things (r
 
 Any text setting can contain `{{ path }}` references, resolved against this scope when the node runs:
 
-| Reference                   | Holds                                                   |
-| --------------------------- | ------------------------------------------------------- |
-| `{{ trigger.<field> }}`     | the triggering event's payload                          |
-| `{{ steps.<name>.<field> }}` | an earlier node's output, by the node's editable name   |
-| `{{ vars.<name> }}`         | a workflow variable written by a Set Variable node      |
+| Reference                    | Holds                                                 |
+| ---------------------------- | ----------------------------------------------------- |
+| `{{ trigger.<field> }}`      | the triggering event's payload                        |
+| `{{ steps.<name>.<field> }}` | an earlier node's output, by the node's editable name |
+| `{{ vars.<name> }}`          | a workflow variable written by a Set Variable node    |
 
 A setting that is only a reference keeps the value's type (a number stays a number); a reference inside other text is turned into text. Each node declares the fields it outputs, and the editor's variable picker lists them, so authors insert references by clicking rather than typing paths. Dropdowns, switches and number boxes can switch into variable mode to take a reference.
 

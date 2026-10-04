@@ -12,11 +12,11 @@ A data model is a record type an admin defines at runtime, with no deploy: Proje
 
 ## Models, fields and records
 
-| Piece  | What it holds                                                                                                                                                 |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Model  | A record type in one organization, with an immutable key.                                                                                                     |
+| Piece  | What it holds                                                                                                                                                   |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Model  | A record type in one organization, with an immutable key.                                                                                                       |
 | Field  | One property of a model: an immutable key (the JSON property name), a type, per-type settings, required flag, position. Every model has a required title field. |
-| Record | The envelope (id, organization, slug, title, timestamps) in real columns, plus every field value in one JSONB `data` column keyed by field key.               |
+| Record | The envelope (id, organization, slug, title, timestamps) in real columns, plus every field value in one JSONB `data` column keyed by field key.                 |
 
 The split is a hybrid: anything every query touches (organization, title, timestamps) is an indexed column, and everything an admin invents is JSON. A baseline GIN index covers the JSON. An admin can ask for a faster plan on one field; the server then builds a Postgres expression index for that field in the background, without blocking writes.
 

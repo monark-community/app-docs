@@ -14,11 +14,11 @@ Data-model records keep their field values in one JSONB column, and MonarkQL tur
 
 ## Options
 
-| Option                                                   | For                                                                   | Against                                                                                             |
-| -------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Prisma's structured JSON `where`                         | Typed, no hand-written SQL, injection-safe by construction            | No `ILIKE`; generates different expressions, so it misses the expression indexes                    |
-| Load records and filter in application code              | Any logic is possible                                                 | Reads whole tables; breaks keyset pagination and totals                                             |
-| Compile the tree to a `Prisma.Sql` fragment              | `ILIKE`, exact index expressions, `EXISTS` for relation filters        | Hand-written SQL to keep safe; access rules must be mirrored in SQL                                  |
+| Option                                      | For                                                             | Against                                                                          |
+| ------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Prisma's structured JSON `where`            | Typed, no hand-written SQL, injection-safe by construction      | No `ILIKE`; generates different expressions, so it misses the expression indexes |
+| Load records and filter in application code | Any logic is possible                                           | Reads whole tables; breaks keyset pagination and totals                          |
+| Compile the tree to a `Prisma.Sql` fragment | `ILIKE`, exact index expressions, `EXISTS` for relation filters | Hand-written SQL to keep safe; access rules must be mirrored in SQL              |
 
 ## Decision
 

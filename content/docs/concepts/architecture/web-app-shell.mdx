@@ -16,13 +16,13 @@ The authenticated layout runs its gates on the server, in order: the user has a 
 
 ## Navigation
 
-| Piece                | What it does                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `PRIMARY_NAV`        | The list of top-level destinations (`config/primary-nav.ts`): an id, a route and an icon each, with a translated label.                      |
-| `usePrimaryNav()`    | Resolves that list for the current user: hides destinations whose feature flag is off, marks the active one, and adds the admin entry for admins. |
-| `NavRail`            | The slim icon rail on the left, on desktop widths.                                                                                         |
-| Navigation drawer    | On mobile, the brand mark in the app bar opens a drawer with the same entries.                                                            |
-| Command palette      | Its "Go to" group is built from `PRIMARY_NAV` too, so every destination is searchable by name with no second edit.                          |
+| Piece             | What it does                                                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PRIMARY_NAV`     | The list of top-level destinations (`config/primary-nav.ts`): an id, a route and an icon each, with a translated label.                           |
+| `usePrimaryNav()` | Resolves that list for the current user: hides destinations whose feature flag is off, marks the active one, and adds the admin entry for admins. |
+| `NavRail`         | The slim icon rail on the left, on desktop widths.                                                                                                |
+| Navigation drawer | On mobile, the brand mark in the app bar opens a drawer with the same entries.                                                                    |
+| Command palette   | Its "Go to" group is built from `PRIMARY_NAV` too, so every destination is searchable by name with no second edit.                                |
 
 Hiding an entry is a convenience. Each route enforces its own flag and permission on the server, so a hidden destination is also a closed one.
 

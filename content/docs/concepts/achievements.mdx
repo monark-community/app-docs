@@ -14,11 +14,11 @@ Achievements are badges an admin defines and Monark hands out automatically. Eac
 
 At boot, every module registers its event types together with the fields each event carries. The achievement editor reads that registry, so the admin picks real values from lists:
 
-| Part of a condition | What it means                                                                 |
-| ------------------- | ----------------------------------------------------------------------------- |
-| Event               | the event type to count, such as a card being created                          |
-| Threshold           | how many matching events a person needs (default 1)                           |
-| Subject field       | which field of the event names the person to credit; defaults to the actor   |
+| Part of a condition | What it means                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------------- |
+| Event               | the event type to count, such as a card being created                                    |
+| Threshold           | how many matching events a person needs (default 1)                                      |
+| Subject field       | which field of the event names the person to credit; defaults to the actor               |
 | Match               | optional field values the event must have, for example a specific column; all must match |
 
 The subject field can hold a list of users, such as a card's assignees, so one event credits several people. A badge with several conditions is awarded as soon as any one of them reaches its threshold. Achievements knows nothing about kanban, wiki or data models; it only knows event types and their fields.

@@ -14,11 +14,11 @@ Every feature in Monark is a workspace package under `packages/`, and the packag
 
 A feature module is a package named `@monark/<name>` with up to three entry points, and nothing else is importable from outside it:
 
-| Entry point  | Holds                                                                     | Imported by                         |
-| ------------ | ------------------------------------------------------------------------- | ----------------------------------- |
+| Entry point  | Holds                                                                      | Imported by                              |
+| ------------ | -------------------------------------------------------------------------- | ---------------------------------------- |
 | `/server`    | the module's tRPC router, data access, event handlers, `register*` helpers | `services/api`, other modules' `/server` |
 | `/client`    | React components and hooks                                                 | `services/web`, other modules' `/client` |
-| `/contracts` | zod schemas, shared types, and the module's domain event types             | both sides                          |
+| `/contracts` | zod schemas, shared types, and the module's domain event types             | both sides                               |
 
 Because a package's `exports` field lists only these paths, reaching into another module's internals fails at module resolution; no lint rule is needed for that case. A module without a UI (Files, for example) omits `/client`.
 
@@ -41,15 +41,15 @@ The current membership of each tier is in [Modules](/docs/reference/modules). Th
 
 Some packages under `packages/` are libraries rather than tiered modules. They aren't in the manifest and anyone may depend on them:
 
-| Package                   | Purpose                                                                                                   |
-| ------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `@monark/db`              | The Prisma schema (core models in `base.prisma`, plus each module's fragment) and the generated client.   |
+| Package                   | Purpose                                                                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@monark/db`              | The Prisma schema (core models in `base.prisma`, plus each module's fragment) and the generated client.                                                                         |
 | `@monark/common`          | The event bus, the event-type and search-source registries, errors, logger, tRPC helpers, pagination, encryption, guarded outbound HTTP, rate limiting, block-document helpers. |
-| `@monark/query`           | The query language: filter tree, operators, text syntax, `@` variables.                                     |
-| `@monark/components`      | Shared UI primitives.                                                                                     |
-| `@monark/shared`          | Framework-free utilities.                                                                                 |
-| `@monark/integration-kit` | Shared plumbing for integration modules: inbound webhook verification, connection routers, a REST client. |
-| `@monark/test-utils`      | The integration-test harness, which boots PostgreSQL in a container and applies migrations.                 |
+| `@monark/query`           | The query language: filter tree, operators, text syntax, `@` variables.                                                                                                         |
+| `@monark/components`      | Shared UI primitives.                                                                                                                                                           |
+| `@monark/shared`          | Framework-free utilities.                                                                                                                                                       |
+| `@monark/integration-kit` | Shared plumbing for integration modules: inbound webhook verification, connection routers, a REST client.                                                                       |
+| `@monark/test-utils`      | The integration-test harness, which boots PostgreSQL in a container and applies migrations.                                                                                     |
 
 `@monark/branding` is in the manifest as a core module but holds only configuration, so it has no router or events.
 

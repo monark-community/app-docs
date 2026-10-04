@@ -14,11 +14,11 @@ Monark had to host two kinds of code with opposite needs. Identity, permissions,
 
 ## Options
 
-| Option                                                            | For                                                                                   | Against                                                                                                 |
-| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| One application with folders per feature                          | Simplest to start; no packaging overhead                                              | Nothing stops a feature reaching into another's internals; boundaries erode under deadline pressure      |
-| A runtime plugin system                                           | Features could be installed per deployment without a rebuild                           | A loader, versioned plugin API and isolation to build and maintain before any feature ships              |
-| Workspace packages in two tiers, with the rules checked at build time | Boundaries enforced by module resolution and CI; no runtime machinery                 | Every module is still compiled into every build; cross-cutting changes touch several packages           |
+| Option                                                                | For                                                                   | Against                                                                                             |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| One application with folders per feature                              | Simplest to start; no packaging overhead                              | Nothing stops a feature reaching into another's internals; boundaries erode under deadline pressure |
+| A runtime plugin system                                               | Features could be installed per deployment without a rebuild          | A loader, versioned plugin API and isolation to build and maintain before any feature ships         |
+| Workspace packages in two tiers, with the rules checked at build time | Boundaries enforced by module resolution and CI; no runtime machinery | Every module is still compiled into every build; cross-cutting changes touch several packages       |
 
 ## Decision
 

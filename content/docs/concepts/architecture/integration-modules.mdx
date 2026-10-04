@@ -26,23 +26,23 @@ In [modules.manifest.ts](https://github.com/monark-community/app/blob/develop/mo
 
 `@monark/integration-kit` is a library, not a tiered module, that integrations take pieces from as they fit:
 
-| Piece                                          | What it does                                                                                                               |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Piece                                          | What it does                                                                                                                                                                                      |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `defineInboundWebhook`                         | Resolves the organization's signing secret, verifies, maps and emits. Answers 404 when unconfigured, 401 on a bad signature, 202 for a delivery it doesn't model (so the provider doesn't retry). |
-| `verifyHmacSha256`, `constantTimeEquals`       | Signature checks for providers that sign the body (GitHub) and providers that echo a shared secret in a header (Telegram).  |
-| `makeConnectionSecretRouter`                   | The connection surface: status, generate the webhook secret, disconnect.                                                    |
-| `createRestClient`, `pickString`, `pickNumber` | A JSON client for APIs that take a static auth header, and safe readers for provider payloads.                              |
+| `verifyHmacSha256`, `constantTimeEquals`       | Signature checks for providers that sign the body (GitHub) and providers that echo a shared secret in a header (Telegram).                                                                        |
+| `makeConnectionSecretRouter`                   | The connection surface: status, generate the webhook secret, disconnect.                                                                                                                          |
+| `createRestClient`, `pickString`, `pickNumber` | A JSON client for APIs that take a static auth header, and safe readers for provider payloads.                                                                                                    |
 
 A provider-specific helper moves into the kit only when a second integration needs it.
 
 ## The integrations today
 
-| Module             | Triggers | Actions | How it differs                                                                                                     |
-| ------------------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
-| `@monark/github`   | yes      | yes     | The reference implementation: HMAC-signed deliveries, a `Bearer` REST client.                                       |
+| Module             | Triggers | Actions | How it differs                                                                                                                                         |
+| ------------------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@monark/github`   | yes      | yes     | The reference implementation: HMAC-signed deliveries, a `Bearer` REST client.                                                                          |
 | `@monark/telegram` | yes      | yes     | A secret header instead of a signature; the token goes in the URL path. Connecting also registers the webhook with Telegram, so it has its own router. |
-| `@monark/twitter`  | no       | yes     | X offers no usable inbound webhook. Every request is signed with OAuth 1.0a, using four credentials stored as secrets. |
-| `@monark/discord`  | no       | yes     | Discord has no event webhook. No connection either: each node picks its credential secret, so the module has no router and no inbound route. |
+| `@monark/twitter`  | no       | yes     | X offers no usable inbound webhook. Every request is signed with OAuth 1.0a, using four credentials stored as secrets.                                 |
+| `@monark/discord`  | no       | yes     | Discord has no event webhook. No connection either: each node picks its credential secret, so the module has no router and no inbound route.           |
 
 Each integration ships behind its own feature flag, off by default; see [Feature flags](/docs/reference/feature-flags).
 

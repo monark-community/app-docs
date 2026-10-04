@@ -34,17 +34,18 @@ The api ships as one container image with no secrets baked in and no migrations 
    ```
 2. Write `clients/<client>.env` and keep it in a secret store, not the repository. These keys differ per instance:
 
-   | Group         | Keys                                                                                   |
-   | ------------- | -------------------------------------------------------------------------------------- |
-   | Database      | `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` |
-   | URLs          | `WEB_ORIGIN`, `APP_URL` (`https://app.<client-domain>`)                                |
-   | Organization  | `INITIAL_ORG_SLUG`, `INITIAL_ORG_NAME`, `INITIAL_ORG_PRIMARY_COLOR`                    |
-   | Branding      | `BRANDING_*` ([Rebrand an instance](/docs/operate/rebrand-an-instance))                           |
-   | Mail          | `SMTP_URL`, `SMTP_FROM`                                                                |
-   | Keys          | `TOTP_ENCRYPTION_KEY`, `SECRETS_ENCRYPTION_KEY`, `EMAIL_ACTION_SECRET`, `CRON_SECRET`: freshly generated, never shared |
-   | Monitoring    | `SENTRY_DSN`, `SENTRY_ENVIRONMENT`                                                     |
+   | Group        | Keys                                                                                                                   |
+   | ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+   | Database     | `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`                        |
+   | URLs         | `WEB_ORIGIN`, `APP_URL` (`https://app.<client-domain>`)                                                                |
+   | Organization | `INITIAL_ORG_SLUG`, `INITIAL_ORG_NAME`, `INITIAL_ORG_PRIMARY_COLOR`                                                    |
+   | Branding     | `BRANDING_*` ([Rebrand an instance](/docs/operate/rebrand-an-instance))                                                           |
+   | Mail         | `SMTP_URL`, `SMTP_FROM`                                                                                                |
+   | Keys         | `TOTP_ENCRYPTION_KEY`, `SECRETS_ENCRYPTION_KEY`, `EMAIL_ACTION_SECRET`, `CRON_SECRET`: freshly generated, never shared |
+   | Monitoring   | `SENTRY_DSN`, `SENTRY_ENVIRONMENT`                                                                                     |
 
    Add `NODE_ENV=production`. The full list is in [Environment variables](/docs/reference/environment-variables). Unlike a `.env` file, Docker's `--env-file` keeps quotes as part of the value, so write hex colours unquoted here: `INITIAL_ORG_PRIMARY_COLOR=#2563EB`.
+
 3. Migrate the client's database with the same image, before the new version goes live:
    ```sh
    docker run --rm --env-file clients/<client>.env <registry>/monark-api:<version> \
@@ -71,12 +72,12 @@ Expect `{"status":"ok","service":"api"}`. Then run the [smoke test](/docs/operat
 
 ## If something goes wrong
 
-| Symptom                                             | Cause                                                       | Fix                                                           |
-| --------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------- |
-| Browser calls to the api fail with a CORS error     | `WEB_ORIGIN` is the origin host, not the client's domain    | Set it to `https://app.<client-domain>`.                      |
-| Container marked unhealthy                          | the api exited at boot                                      | Read the container log for `Invalid environment:`.            |
-| `invalid INITIAL_ORG_PRIMARY_COLOR` at boot         | the hex value is quoted in the Docker env file              | Remove the quotes.                                            |
-| Users of one client see another client's data       | two instances share a database URL                          | Give each instance its own Supabase project.                  |
-| Account deletions never complete                    | the daily cron call isn't scheduled                         | Add it as in step 5.                                          |
+| Symptom                                         | Cause                                                    | Fix                                                |
+| ----------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------- |
+| Browser calls to the api fail with a CORS error | `WEB_ORIGIN` is the origin host, not the client's domain | Set it to `https://app.<client-domain>`.           |
+| Container marked unhealthy                      | the api exited at boot                                   | Read the container log for `Invalid environment:`. |
+| `invalid INITIAL_ORG_PRIMARY_COLOR` at boot     | the hex value is quoted in the Docker env file           | Remove the quotes.                                 |
+| Users of one client see another client's data   | two instances share a database URL                       | Give each instance its own Supabase project.       |
+| Account deletions never complete                | the daily cron call isn't scheduled                      | Add it as in step 5.                               |
 
 Next: [Run a second instance on your machine](/docs/operate/run-a-second-instance-on-your-machine)

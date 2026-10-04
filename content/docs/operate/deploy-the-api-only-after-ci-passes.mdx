@@ -31,12 +31,12 @@ To redeploy without a code change (for example after fixing an environment varia
 
 ## If something goes wrong
 
-| Symptom                                                  | Cause                                                              | Fix                                                                       |
-| -------------------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Workflow passes with "RENDER_API_KEY is not set"         | secret missing or misnamed                                         | Add it exactly as `RENDER_API_KEY`.                                       |
-| Summary says a service is "not found on Render"          | service renamed or created by hand                                 | Use the blueprint's names, or create the services from the blueprint.     |
-| A service shows `pre_deploy_failed`                      | `prisma migrate deploy` failed                                     | Read the Render deploy log; fix the database or migration, then rerun.    |
-| Times out after 20 minutes                               | the deploy hung on Render                                          | Check the Render dashboard, then rerun from **Run workflow**.              |
-| Without the workflow, the api doesn't follow a merge     | services not blueprint-managed, **Auto-Deploy** off in the dashboard, the Render GitHub connection lapsed, or the push wasn't to `main` or `develop` | Check each in that order under the service's **Settings** and **Account Settings → GitHub**. |
+| Symptom                                              | Cause                                                                                                                                                | Fix                                                                                          |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Workflow passes with "RENDER_API_KEY is not set"     | secret missing or misnamed                                                                                                                           | Add it exactly as `RENDER_API_KEY`.                                                          |
+| Summary says a service is "not found on Render"      | service renamed or created by hand                                                                                                                   | Use the blueprint's names, or create the services from the blueprint.                        |
+| A service shows `pre_deploy_failed`                  | `prisma migrate deploy` failed                                                                                                                       | Read the Render deploy log; fix the database or migration, then rerun.                       |
+| Times out after 20 minutes                           | the deploy hung on Render                                                                                                                            | Check the Render dashboard, then rerun from **Run workflow**.                                |
+| Without the workflow, the api doesn't follow a merge | services not blueprint-managed, **Auto-Deploy** off in the dashboard, the Render GitHub connection lapsed, or the push wasn't to `main` or `develop` | Check each in that order under the service's **Settings** and **Account Settings → GitHub**. |
 
 Next: [Set up social sign-in](/docs/operate/set-up-social-sign-in)

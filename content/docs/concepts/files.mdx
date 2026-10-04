@@ -19,11 +19,11 @@ A bucket is a storage container with its own rules: public or private, a size li
 
 Buckets are private by default. A private file is reached only through a signed URL minted by the server, valid for five minutes, so no storage access policy is needed per bucket. A public bucket returns a plain public URL instead; badge images use one so they can be cached.
 
-| Bucket              | Visibility | Used by                                                                                     |
-| ------------------- | ---------- | ------------------------------------------------------------------------------------------- |
+| Bucket              | Visibility | Used by                                                                                                |
+| ------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
 | `data-model-files`  | private    | every data-model file and attachments field; the field's own allowed types and size are the real limit |
-| `achievement-icons` | public     | achievement badge images                                                                    |
-| admin-created       | either     | files uploaded on the **Files** admin page                                                  |
+| `achievement-icons` | public     | achievement badge images                                                                               |
+| admin-created       | either     | files uploaded on the **Files** admin page                                                             |
 
 Both built-in buckets are created at API boot. A deployment without storage configured logs a warning and carries on; uploads then fail with a clear error.
 
@@ -56,12 +56,12 @@ Extended modules may not depend on each other, so a service that several feature
 
 ## Permissions and events
 
-| Permission                    | Allows                       |
-| ----------------------------- | ---------------------------- |
-| `files.view`                  | list files and download them |
-| `files.upload`                | upload files                 |
-| `files.delete`                | delete files                 |
-| `files.manage-buckets`        | create buckets               |
+| Permission             | Allows                       |
+| ---------------------- | ---------------------------- |
+| `files.view`           | list files and download them |
+| `files.upload`         | upload files                 |
+| `files.delete`         | delete files                 |
+| `files.manage-buckets` | create buckets               |
 
 Every change emits an event (`files.bucket-created`, `files.file-uploaded`, `files.file-deleted`), so webhooks can subscribe to them. The **Files** admin page sits behind the `files.enabled` feature flag, on by default. Files send no notifications.
 

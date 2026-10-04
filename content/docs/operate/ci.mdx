@@ -70,10 +70,10 @@ Verify: after the next docs merge, the **Notify docs site** run logs "Asked app-
 
 ## If something goes wrong
 
-| Symptom                                               | Cause                                                        | Fix                                                                 |
-| ----------------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `repo-checks` fails on codegen drift                  | a generated file wasn't regenerated                          | Run `pnpm gen` and commit the result.                               |
-| `migration-drift` fails                               | schema changed without a migration, or a migration was edited | Create the migration as in [Change the database schema](/docs/build/extend/change-the-database-schema). |
-| A pull request waits forever for a check              | a second required check was added to branch protection       | Remove it; keep only `ci-ok`.                                       |
-| `coverage-upload` fails below a floor                 | coverage dropped                                             | Add tests, or lower the floor deliberately with a comment.          |
-| **Notify docs site** logs "skipping"                  | the App secrets are missing                                  | Add them as above.                                                  |
+| Symptom                                  | Cause                                                         | Fix                                                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `repo-checks` fails on codegen drift     | a generated file wasn't regenerated                           | Run `pnpm gen` and commit the result.                                                                   |
+| `migration-drift` fails                  | schema changed without a migration, or a migration was edited | Create the migration as in [Change the database schema](/docs/build/extend/change-the-database-schema). |
+| A pull request waits forever for a check | a second required check was added to branch protection        | Remove it; keep only `ci-ok`.                                                                           |
+| `coverage-upload` fails below a floor    | coverage dropped                                              | Add tests, or lower the floor deliberately with a comment.                                              |
+| **Notify docs site** logs "skipping"     | the App secrets are missing                                   | Add them as above.                                                                                      |

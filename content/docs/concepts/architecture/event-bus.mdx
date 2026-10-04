@@ -25,10 +25,10 @@ Every event extends a common base: `type`, `occurredAt`, an optional `correlatio
 
 ## Two views of the same events
 
-| View                    | What it is                                                                                                                   | Who reads it                                                    |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| The `DomainEvent` union | A TypeScript union generated from each module's `contracts/events.ts` by `pnpm gen:events`. Compile time only.               | `emit` and `on`, so a wrong type or payload fails typecheck.    |
-| The event-type registry | A runtime list built from each module's `registerEventTypes` call: type, owning module, description, and payload fields.    | The webhook subscription picker and the automation Event Trigger node. |
+| View                    | What it is                                                                                                               | Who reads it                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| The `DomainEvent` union | A TypeScript union generated from each module's `contracts/events.ts` by `pnpm gen:events`. Compile time only.           | `emit` and `on`, so a wrong type or payload fails typecheck.           |
+| The event-type registry | A runtime list built from each module's `registerEventTypes` call: type, owning module, description, and payload fields. | The webhook subscription picker and the automation Event Trigger node. |
 
 The two are kept aligned by convention, not by a check. The webhook module's own events (`webhook.*`) are in the union but deliberately not in the registry: the webhook subscriber skips them to avoid delivering webhooks about webhooks. The full catalog is in [Domain events](/docs/reference/events).
 

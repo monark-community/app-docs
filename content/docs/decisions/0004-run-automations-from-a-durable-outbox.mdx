@@ -14,11 +14,11 @@ Automations react to domain events, and the event bus is in memory and best-effo
 
 ## Options
 
-| Option                                              | For                                                       | Against                                                                                      |
-| --------------------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Run the flow inline in the bus subscriber            | Simplest; no queue                                        | Slows or breaks the emitting request; lost on restart; no retries; delays impossible         |
-| An external job queue (Redis, a hosted queue)        | Mature retries and scheduling                             | New infrastructure for every deployment                                                      |
-| A run table in Postgres as the outbox, drained by a worker | Durable with the database already there; doubles as run history | Polling latency; Monark owns the claim, retry and resume logic                               |
+| Option                                                     | For                                                             | Against                                                                              |
+| ---------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Run the flow inline in the bus subscriber                  | Simplest; no queue                                              | Slows or breaks the emitting request; lost on restart; no retries; delays impossible |
+| An external job queue (Redis, a hosted queue)              | Mature retries and scheduling                                   | New infrastructure for every deployment                                              |
+| A run table in Postgres as the outbox, drained by a worker | Durable with the database already there; doubles as run history | Polling latency; Monark owns the claim, retry and resume logic                       |
 
 ## Decision
 

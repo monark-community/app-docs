@@ -32,15 +32,15 @@ An extended module adds its `register*` calls to the matching steps. This list i
 
 The Express app mounts, in order:
 
-| Route                                   | Purpose                                                                                       | Authentication                     |
-| --------------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `GET /health`                           | Liveness                                                                                      | none                               |
-| `/api/v1/*`                             | The public REST API, mounted before `/trpc` with its own middleware                            | API key, plus rate limiting        |
-| `POST /cron/*`                          | External fallbacks for the background work below                                              | `Bearer` `CRON_SECRET`             |
-| `POST /hooks/automation/:id`            | Fires an automation's HTTP trigger                                                            | `Bearer` per-automation secret     |
-| `POST /hooks/github/:org`, `/hooks/telegram/:org` | Inbound deliveries from integration providers                                        | provider signature or secret header |
-| `POST /chat/stream`                     | Streams the assistant's reply as server-sent events                                            | Supabase session                   |
-| `/trpc/*`                               | Every module's tRPC router                                                                    | Supabase session                   |
+| Route                                             | Purpose                                                             | Authentication                      |
+| ------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------- |
+| `GET /health`                                     | Liveness                                                            | none                                |
+| `/api/v1/*`                                       | The public REST API, mounted before `/trpc` with its own middleware | API key, plus rate limiting         |
+| `POST /cron/*`                                    | External fallbacks for the background work below                    | `Bearer` `CRON_SECRET`              |
+| `POST /hooks/automation/:id`                      | Fires an automation's HTTP trigger                                  | `Bearer` per-automation secret      |
+| `POST /hooks/github/:org`, `/hooks/telegram/:org` | Inbound deliveries from integration providers                       | provider signature or secret header |
+| `POST /chat/stream`                               | Streams the assistant's reply as server-sent events                 | Supabase session                    |
+| `/trpc/*`                                         | Every module's tRPC router                                          | Supabase session                    |
 
 The raw request body is kept for the inbound hook routes, so signatures are checked against exactly the bytes the provider sent.
 

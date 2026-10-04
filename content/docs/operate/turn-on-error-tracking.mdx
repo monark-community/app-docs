@@ -39,18 +39,20 @@ What gets reported: unhandled errors in the api's raw routes (`/cron/*`, `/hooks
 Open the web app, then run this in the browser console:
 
 ```js
-setTimeout(() => { throw new Error("Sentry test"); });
+setTimeout(() => {
+  throw new Error("Sentry test");
+});
 ```
 
 The network panel shows a request to `/monitoring`, and the error appears in Sentry within a minute, tagged with the environment you set.
 
 ## If something goes wrong
 
-| Symptom                                   | Cause                                                       | Fix                                                        |
-| ----------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
-| No browser events                         | `NEXT_PUBLIC_SENTRY_DSN` set without a redeploy             | Redeploy; `NEXT_PUBLIC_*` values are build-time.           |
-| Browser stack traces are minified         | source-map upload skipped                                   | Set the three build variables in step 3.                    |
-| Staging errors show up as production      | environment tag not set on Preview                          | Set `NEXT_PUBLIC_SENTRY_ENVIRONMENT` per Vercel environment. |
-| Expected 404s or permission errors missing | client errors are deliberately not reported                | None; only server failures are sent.                        |
+| Symptom                                    | Cause                                           | Fix                                                          |
+| ------------------------------------------ | ----------------------------------------------- | ------------------------------------------------------------ |
+| No browser events                          | `NEXT_PUBLIC_SENTRY_DSN` set without a redeploy | Redeploy; `NEXT_PUBLIC_*` values are build-time.             |
+| Browser stack traces are minified          | source-map upload skipped                       | Set the three build variables in step 3.                     |
+| Staging errors show up as production       | environment tag not set on Preview              | Set `NEXT_PUBLIC_SENTRY_ENVIRONMENT` per Vercel environment. |
+| Expected 404s or permission errors missing | client errors are deliberately not reported     | None; only server failures are sent.                         |
 
 Next: [Turn on the AI assistant](/docs/operate/turn-on-the-ai-assistant)

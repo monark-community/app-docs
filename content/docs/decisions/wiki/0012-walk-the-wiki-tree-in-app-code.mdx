@@ -14,10 +14,10 @@ The wiki needs pages nested to any depth, with a breadcrumb, a move that can't c
 
 ## Options
 
-| Option                                  | For                                                                  | Against                                                                     |
-| --------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Walk the list in application code       | Plain Prisma, no raw SQL; reuses the list the sidebar already loads  | Every tree operation loads the organization's whole page list               |
-| Recursive SQL query (`WITH RECURSIVE`)  | The database does the walk; scales to very large trees               | Raw SQL outside Prisma's typed client, for trees that stay small in practice |
+| Option                                 | For                                                                 | Against                                                                      |
+| -------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Walk the list in application code      | Plain Prisma, no raw SQL; reuses the list the sidebar already loads | Every tree operation loads the organization's whole page list                |
+| Recursive SQL query (`WITH RECURSIVE`) | The database does the walk; scales to very large trees              | Raw SQL outside Prisma's typed client, for trees that stay small in practice |
 
 ## Decision
 
