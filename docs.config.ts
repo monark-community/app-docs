@@ -11,7 +11,7 @@ export default defineConfig({
     shortName: "Docs",
     siteUrl: "https://docs.monark.io",
     description:
-      "Documentation for the Monark application platform — user guides, module guides, and technical documentation.",
+      "Documentation for the Monark application platform: using it, administering it, building on it and running it.",
     github: {
       owner: "monark-community",
       repo: "app",
@@ -37,9 +37,5 @@ export default defineConfig({
     { dir: "concepts", label: "Concepts", icon: "Lightbulb" },
     { dir: "operate", label: "Operate", icon: "Terminal" },
     { dir: "decisions", label: "Decisions", icon: "Scale" },
-    // Legacy layout, until the migration empties it.
-    { dir: "user-guide", label: "User guide", icon: "BookOpen" },
-    { dir: "modules", label: "Modules", icon: "Boxes" },
-    { dir: "technical-documentation", label: "Technical", icon: "Code2" },
   ],
 })

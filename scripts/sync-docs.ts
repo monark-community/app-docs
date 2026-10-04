@@ -28,23 +28,13 @@ import path from "node:path"
 interface Mapping {
   /** Directory in the source repo, relative to its root. */
   from: string
-  /** Section directory under `content/docs/`. */
+  /**
+   * Section directory under `content/docs/`. Each extended module's
+   * `packages/<name>/docs/<section>/` merges into it too, under a `<name>/`
+   * folder : modules keep their docs in the package so they leave with it,
+   * but a reader finds them next to core.
+   */
   section: string
-  /**
-   * `"dir"`  — every `*.md` in `from`.
-   * `"glob"` — `from` contains a single `*`, and each match contributes one
-   *            file named after the wildcard segment (used for
-   *            `packages/<name>/docs/user-guide.md` → `modules/<name>.mdx`).
-   */
-  kind: "dir" | "glob"
-  /** Slugs pinned to the top of the section, in this order, before the rest. */
-  pinned?: string[]
-  /**
-   * Also merge each extended module's `packages/<name>/docs/<section>/` into
-   * this section, under a `<name>/` folder. Modules keep their docs in the
-   * package so they leave with it, but a reader finds them next to core.
-   */
-  packages?: boolean
 }
 
 /**
@@ -63,26 +53,9 @@ const READER_SECTIONS = [
   "decisions",
 ]
 
-const MAPPINGS: Mapping[] = [
-  ...READER_SECTIONS.map(
-    (section): Mapping => ({ from: `docs/${section}`, section, kind: "dir", packages: true }),
-  ),
-  // Legacy layout, published until the migration empties it.
-  { from: "docs/user-guide", section: "user-guide", kind: "dir" },
-  {
-    from: "packages/*/docs/user-guide.md",
-    section: "modules",
-    kind: "glob",
-  },
-  {
-    from: "docs/technical-documentation",
-    section: "technical-documentation",
-    kind: "dir",
-    // The platform overview is the "start here" page ; the rest is reference
-    // material and sorts alphabetically behind it.
-    pinned: ["platform-overview", "architecture", "extensibility-contract"],
-  },
-]
+const MAPPINGS: Mapping[] = READER_SECTIONS.map(
+  (section): Mapping => ({ from: `docs/${section}`, section }),
+)
 
 /**
  * Site route (under `/docs/`) for a source directory, or null when that
@@ -90,15 +63,6 @@ const MAPPINGS: Mapping[] = [
  * `use/data`, `packages/kanban/docs/use` → `use/kanban`.
  */
 function siteDirOf(sourceDir: string): string | null {
-  const legacy: Record<string, string> = {
-    "docs/user-guide": "user-guide",
-    "docs/technical-documentation": "technical-documentation",
-  }
-  for (const [prefix, section] of Object.entries(legacy)) {
-    if (sourceDir === prefix || sourceDir.startsWith(`${prefix}/`)) {
-      return section + sourceDir.slice(prefix.length)
-    }
-  }
   const core = sourceDir.match(/^docs\/([^/]+)(\/.*)?$/)
   if (core && READER_SECTIONS.includes(core[1] ?? "")) return `${core[1]}${core[2] ?? ""}`
   const pkg = sourceDir.match(/^packages\/([^/]+)\/docs\/([^/]+)(\/.*)?$/)
@@ -158,9 +122,9 @@ function firstParagraph(md: string): string {
 /**
  * Sidebar order for a section. An `_index.md` is authoritative when present
  * (its link order is the order the author intended a reader to meet the
- * pages); otherwise pinned slugs come first and the rest sort alphabetically.
+ * pages); otherwise the pages sort alphabetically.
  */
-function sectionOrder(dir: string, slugs: string[], pinned: string[] = []): Map<string, number> {
+function sectionOrder(dir: string, slugs: string[]): Map<string, number> {
   const order = new Map<string, number>()
   const indexPath = path.join(dir, "_index.md")
 
@@ -193,7 +157,6 @@ function sectionOrder(dir: string, slugs: string[], pinned: string[] = []): Map<
   }
 
   let next = 0
-  for (const slug of pinned) if (slugs.includes(slug)) order.set(slug, next++)
   for (const slug of [...slugs].sort()) if (!order.has(slug)) order.set(slug, next++)
   return order
 }
@@ -264,10 +227,6 @@ function rewriteLinks(md: string, fromDir: string): string {
         return `](${ASSET_URL_PREFIX}/${path.basename(repoRelative)})`
       }
 
-      // A module's user guide lives at packages/<name>/docs/user-guide.md.
-      const moduleMatch = repoRelative.match(/^packages\/([^/]+)\/docs\/user-guide\.md$/)
-      if (moduleMatch) return `](/docs/modules/${moduleMatch[1]}${hash})`
-
       if (repoRelative.endsWith(".md")) {
         const dir = path.dirname(repoRelative)
         const name = path.basename(repoRelative, ".md")
@@ -332,23 +291,6 @@ interface SourceDoc {
 }
 
 function collect(mapping: Mapping): SourceDoc[] {
-  if (mapping.kind === "glob") {
-    const [prefix, suffix] = mapping.from.split("*")
-    const base = path.join(SOURCE, prefix ?? "")
-    if (!fs.existsSync(base)) return []
-    return fs
-      .readdirSync(base, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
-      .map((d) => ({ name: d.name, file: path.join(base, d.name, suffix ?? "") }))
-      .filter((c) => fs.existsSync(c.file))
-      .map((c) => ({
-        file: c.file,
-        fromDir: path.relative(SOURCE, path.dirname(c.file)).replace(/\\/g, "/"),
-        section: mapping.section,
-        slug: c.name,
-      }))
-  }
-
   // Walk, don't list: the source keeps long guides as a folder of focused
   // pages, and the site mirrors that shape (see the tree in lib/docs.ts).
   const out: SourceDoc[] = []
@@ -374,14 +316,12 @@ function collect(mapping: Mapping): SourceDoc[] {
   const dir = path.join(SOURCE, mapping.from)
   if (fs.existsSync(dir)) walk(mapping.from, dir, [], [])
 
-  if (mapping.packages) {
-    const pkgs = path.join(SOURCE, "packages")
-    const names = fs.existsSync(pkgs) ? fs.readdirSync(pkgs).sort() : []
-    for (const name of names) {
-      const from = `packages/${name}/docs/${mapping.section}`
-      const pkgDir = path.join(SOURCE, from)
-      if (fs.existsSync(pkgDir)) walk(from, pkgDir, [], [name])
-    }
+  const pkgs = path.join(SOURCE, "packages")
+  const names = fs.existsSync(pkgs) ? fs.readdirSync(pkgs).sort() : []
+  for (const name of names) {
+    const from = `packages/${name}/docs/${mapping.section}`
+    const pkgDir = path.join(SOURCE, from)
+    if (fs.existsSync(pkgDir)) walk(from, pkgDir, [], [name])
   }
   return out
 }
@@ -426,53 +366,46 @@ for (const mapping of MAPPINGS) {
   // numbered together. Numbering them separately is what let a folder and a
   // page claim the same position.
   const order = new Map<string, number>()
-  if (mapping.kind === "dir") {
-    // dir -> { files: [name], dirs: [name] }
-    const entries = new Map<string, { files: string[]; dirs: Set<string> }>()
-    const bucket = (dir: string) => {
-      let e = entries.get(dir)
-      if (!e) {
-        e = { files: [], dirs: new Set() }
-        entries.set(dir, e)
-      }
-      return e
+  // dir -> { files: [name], dirs: [name] }
+  const entries = new Map<string, { files: string[]; dirs: Set<string> }>()
+  const bucket = (dir: string) => {
+    let e = entries.get(dir)
+    if (!e) {
+      e = { files: [], dirs: new Set() }
+      entries.set(dir, e)
     }
-    for (const doc of docs) {
-      const parts = doc.slug.split("/")
-      const dir = parts.slice(0, -1).join("/")
-      const name = parts[parts.length - 1] as string
-      // `_index` is the folder itself, ordered by the parent, not a child.
-      if (name !== "_index") bucket(dir).files.push(name)
-      // Register every ancestor folder with its own parent.
-      for (let i = parts.length - 1; i > 0; i--) {
-        const child = parts[i - 1] as string
-        const parent = parts.slice(0, i - 1).join("/")
-        bucket(parent).dirs.add(child)
-      }
+    return e
+  }
+  for (const doc of docs) {
+    const parts = doc.slug.split("/")
+    const dir = parts.slice(0, -1).join("/")
+    const name = parts[parts.length - 1] as string
+    // `_index` is the folder itself, ordered by the parent, not a child.
+    if (name !== "_index") bucket(dir).files.push(name)
+    // Register every ancestor folder with its own parent.
+    for (let i = parts.length - 1; i > 0; i--) {
+      const child = parts[i - 1] as string
+      const parent = parts.slice(0, i - 1).join("/")
+      bucket(parent).dirs.add(child)
     }
+  }
 
-    // Where each slug folder's files really live : a module's `kanban/` folder
-    // reads its `_index.md` from packages/kanban/docs/<section>/, not from
-    // under mapping.from.
-    const sourceDirOf = new Map<string, string>()
-    for (const doc of docs) {
-      sourceDirOf.set(doc.slug.split("/").slice(0, -1).join("/"), path.dirname(doc.file))
-    }
+  // Where each slug folder's files really live : a module's `kanban/` folder
+  // reads its `_index.md` from packages/kanban/docs/<section>/, not from
+  // under mapping.from.
+  const sourceDirOf = new Map<string, string>()
+  for (const doc of docs) {
+    sourceDirOf.set(doc.slug.split("/").slice(0, -1).join("/"), path.dirname(doc.file))
+  }
 
-    for (const [dir, { files, dirs }] of entries) {
-      const source = sourceDirOf.get(dir) ?? path.join(SOURCE, mapping.from, dir)
-      const names = [...files, ...dirs]
-      const resolved = sectionOrder(source, names, dir ? [] : mapping.pinned)
-      for (const [name, n] of resolved) {
-        const slug = dir ? `${dir}/${name}` : name
-        // A folder's position is carried by its landing page, which is what
-        // the site sorts the folder by.
-        order.set(dirs.has(name) ? `${slug}/_index` : slug, n)
-      }
-    }
-  } else {
-    for (const [name, n] of sectionOrder("", docs.map((d) => d.slug), mapping.pinned)) {
-      order.set(name, n)
+  for (const [dir, { files, dirs }] of entries) {
+    const source = sourceDirOf.get(dir) ?? path.join(SOURCE, mapping.from, dir)
+    const names = [...files, ...dirs]
+    for (const [name, n] of sectionOrder(source, names)) {
+      const slug = dir ? `${dir}/${name}` : name
+      // A folder's position is carried by its landing page, which is what
+      // the site sorts the folder by.
+      order.set(dirs.has(name) ? `${slug}/_index` : slug, n)
     }
   }
 

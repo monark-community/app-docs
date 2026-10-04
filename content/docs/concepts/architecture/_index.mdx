@@ -1,0 +1,20 @@
+---
+title: "Architecture"
+description: "How the Monark codebase is put together: what a module is, the walls between modules and what enforces them, how modules talk, what is generated, and how the API and web app start. Read it before a…"
+order: 2
+source: "docs/concepts/architecture/_index.md"
+---
+
+
+# Architecture
+
+How the Monark codebase is put together: what a module is, the walls between modules and what enforces them, how modules talk, what is generated, and how the API and web app start. Read it before adding a module or changing how modules connect; the step-by-step versions are in [Extend Monark](/docs/build/extend).
+
+- [Modules and tiers](/docs/concepts/architecture/modules-and-tiers): what a module is, core versus extended, and how the repository is laid out.
+- [Module boundaries](/docs/concepts/architecture/boundaries): the rules modules must not break, and the checks that catch a break.
+- [The extensibility contract](/docs/concepts/architecture/extensibility-contract): what core guarantees to a new module, and what the module promises back.
+- [The event bus](/docs/concepts/architecture/event-bus): how modules react to each other without importing each other, and where durability comes from.
+- [Generated code](/docs/concepts/architecture/generated-code): the three artifacts built from module sources, and why CI rejects drift.
+- [How the API boots](/docs/concepts/architecture/api-boot-sequence): the registration order, the routes it mounts, and the background work it starts.
+- [The web app shell](/docs/concepts/architecture/web-app-shell): the navigation, app bar and shared screen patterns every page sits in.
+- [Integration modules](/docs/concepts/architecture/integration-modules): how a third-party service plugs into automations as an ordinary extended module.
