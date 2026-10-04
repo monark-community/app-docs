@@ -1,0 +1,19 @@
+---
+title: "Deploy checklist"
+description: "A first production deploy of one Monark instance: the api and its scheduled jobs on Render, the web app on Vercel, Postgres and sign-in on Supabase. One deployment serves one organization. Allow ab…"
+order: 1
+source: "docs/operate/deploy-checklist/_index.md"
+---
+
+
+# Deploy checklist
+
+A first production deploy of one Monark instance: the api and its scheduled jobs on Render, the web app on Vercel, Postgres and sign-in on Supabase. One deployment serves one organization. Allow about an hour the first time; each phase below can be done in its own sitting, in this order.
+
+- [Prepare accounts and secrets](/docs/operate/deploy-checklist/prepare-accounts-and-secrets): generate the keys and create the Supabase project and mail provider everything else needs.
+- [Deploy the api to Render](/docs/operate/deploy-checklist/deploy-the-api-to-render): create the api and cron services from the blueprint and get the api URL.
+- [Deploy the web app to Vercel](/docs/operate/deploy-checklist/deploy-the-web-app-to-vercel): publish the web app, then point the api and Supabase at its URL.
+- [Smoke-test a deployment](/docs/operate/deploy-checklist/smoke-test-a-deployment): sign up, confirm, and make yourself the administrator.
+- [Add custom domains](/docs/operate/deploy-checklist/add-custom-domains): move both services to your own domain once the smoke test passes.
+
+For a staging environment next to production, see [Add a staging environment](/docs/operate/add-a-staging-environment). Every variable is listed in [Environment variables](/docs/reference/environment-variables).
