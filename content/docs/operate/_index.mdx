@@ -1,0 +1,24 @@
+---
+title: "Operate"
+description: "Runbooks for whoever deploys and runs a Monark instance on Vercel, Render and Supabase. New to this? Start with Deploy your first instance."
+order: 999
+source: "docs/operate/_index.md"
+---
+
+
+# Operate
+
+Runbooks for whoever deploys and runs a Monark instance on Vercel, Render and Supabase. New to this? Start with [Deploy your first instance](/docs/get-started/deploy-your-first-instance).
+
+- [Deploy checklist](/docs/operate/deploy-checklist): a first production deploy, phase by phase.
+- [Add a staging environment](/docs/operate/add-a-staging-environment): a copy that redeploys from `develop`, with its own database.
+- [Deploy the api only after CI passes](/docs/operate/deploy-the-api-only-after-ci-passes): stop broken commits from reaching Render.
+- [Set up social sign-in](/docs/operate/set-up-social-sign-in): offer GitHub, Google or Microsoft sign-in.
+- [Rebrand an instance](/docs/operate/rebrand-an-instance): your product's name, colours, logo, favicon and auth emails.
+- [Turn on error tracking](/docs/operate/turn-on-error-tracking): send errors from every service to Sentry.
+- [Turn on the AI assistant](/docs/operate/turn-on-the-ai-assistant): connect the assistant to Anthropic and enable it.
+- [Choose a webhook secret store](/docs/operate/choose-a-webhook-secret-store): keep webhook deliveries signed across restarts.
+- [Recover a locked-out user](/docs/operate/recover-a-locked-out-user): when someone loses every sign-in factor, or the last administrator is locked out.
+- [Run several instances](/docs/operate/run-several-instances): one isolated instance per business, from one container image.
+- [Run a second instance on your machine](/docs/operate/run-a-second-instance-on-your-machine): two local stacks side by side.
+- [Maintain the CI pipeline](/docs/operate/ci): local checks, end-to-end runs, new jobs, coverage floors, docs sync.

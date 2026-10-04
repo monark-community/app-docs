@@ -1,0 +1,27 @@
+---
+title: "Decisions"
+description: "Architecture decision records, numbered in order of acceptance. A later record supersedes, never rewrites. For how things work today, read Concepts."
+order: 999
+source: "docs/decisions/_index.md"
+---
+
+
+# Decisions
+
+Architecture decision records, numbered in order of acceptance. A later record supersedes, never rewrites. For how things work today, read [Concepts](/docs/concepts).
+
+- [0001. Split modules into core and extended tiers](/docs/decisions/0001-split-modules-into-core-and-extended-tiers): business features sit on a fixed core.
+- [0002. Keep the event bus in memory](/docs/decisions/0002-keep-the-event-bus-in-memory): durability lives in outboxes.
+- [0003. Open core registries to runtime registration](/docs/decisions/0003-open-core-registries-to-runtime-registration): modules register at boot.
+- [0004. Run automations from a durable outbox](/docs/decisions/0004-run-automations-from-a-durable-outbox): runs are rows a worker claims.
+- [0005. Give each module its own schema fragment](/docs/decisions/0005-give-each-module-its-own-schema-fragment): modules own their tables.
+- [0006. Store integration credentials in one write-only secret store](/docs/decisions/0006-store-integration-credentials-in-a-write-only-secret-store): one encrypted store.
+- [0007. Compile record queries to raw SQL](/docs/decisions/0007-compile-record-queries-to-raw-sql): to match the indexes.
+- [0008. Pass automation data by reference](/docs/decisions/0008-pass-automation-data-by-reference): names, not wires.
+- [0009. Declare integrations as manifest metadata](/docs/decisions/0009-declare-integrations-as-manifest-metadata): not a new tier.
+- [0010. Run assistant tools in-process](/docs/decisions/0010-run-assistant-tools-in-process): the user stays the actor.
+- [0011. Inject the assistant's tool executor at boot](/docs/decisions/0011-inject-the-assistant-tool-executor-at-boot): no import of the API.
+- [0012. Walk the wiki page tree in application code](/docs/decisions/wiki/0012-walk-the-wiki-tree-in-app-code): not a recursive query.
+- [0013. Store long-form content as BlockNote JSON](/docs/decisions/0013-store-long-form-content-as-blocknote-json): blocks, not HTML.
+- [0014. Make record scopes additive across roles](/docs/decisions/0014-make-record-scopes-additive-across-roles): more roles never see less.
+- [0015. Serve one organization per deployment](/docs/decisions/0015-serve-one-organization-per-deployment): one instance per business.
