@@ -1,23 +1,23 @@
 /**
  * Brand layer — imported at the END of the shell's globals.css, so these
  * token values win the cascade against the shell's defaults. Copied from
- * Monark UI so the docs site and the component library read as one product.
+ * Monark UI (the v1.0.0 `theme`, https://ui.monark.io/r/v1.0.0/theme.json)
+ * so the docs site and the component library read as one product.
  *
  * This file plus `docs.config.ts` and `public/` (favicons, OG image) is the
  * whole white-label surface: rebranding never touches a component.
  *
- * Spec:
- *   Style          new-york (shadcn)
- *   Base color     zinc
- *   Theme          orange
- *   Chart color    orange
- *   Radius         medium (0.5rem)
- *   Heading font   Nunito Sans
- *   Body font      Nunito Sans
- *   Icon library   Lucide
- *   Menu           translucent
- *   Menu accent    subtle
- *   Primitive base Radix UI
+ * Monark 2026 brand: warm cream light mode, espresso dark mode, flat orange
+ * primary with dark text on it, 1rem radius, Nunito Sans.
+ *
+ * Two layers, like monark.io's app/theme.css:
+ *   1. Fixed hex values, precomputed from the formulas, for browsers
+ *      without CSS relative color.
+ *   2. The formulas, inside @supports: every surface, border and text token
+ *      is derived from --primary (keeping its own lightness, taking the
+ *      primary's hue and a share of its chroma scaled by --surface-tint).
+ *      Change --primary and the surfaces follow; --surface-tint: 0 gives
+ *      neutral surfaces.
  */
 
 @import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
@@ -25,83 +25,124 @@
 :root {
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono", monospace;
 
-  /* Radius: medium */
-  --radius: 0.5rem;
+  --radius: 1rem;
+  --surface-tint: 1;
+  --primary: #f88d10;
 
-  /* Base: zinc / Theme: orange — LIGHT */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.723 0.168 59.48); /* #F0870C */
-  --primary-foreground: oklch(0.141 0.005 285.823);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.723 0.168 59.48);
+  --background: #fff9f3; /* cream */
+  --foreground: #15110e; /* 18:1 on background */
+  --card: #fffefc; /* near-white */
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary-foreground: var(--foreground); /* dark on orange, 7.9:1 */
+  --secondary: #f7ece4;
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --muted-foreground: #625952; /* 6.5:1 on background */
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --destructive: #c81e0b;
+  --destructive-foreground: #ffffff; /* 5.8:1 */
+  --border: #e9dfd7; /* decorative dividers */
+  --input: #857f7a; /* form borders, 3.9:1 */
+  /* Orange-family text and links on light surfaces, 4.9:1. */
+  --primary-ink: #b65000;
+  /* Focus rings: flat orange is only 2.3:1 on cream, under the 3:1 minimum
+     for focus indicators, so light mode draws them in the orange ink. */
+  --ring: var(--primary-ink);
+  /* Status colours: muted green and amber, always paired with a label. */
+  --success: #2f7a4a;
+  --warning: #8a5a00;
 
-  /* Chart palette: brand orange anchor + coral + gold (warm) + teal + indigo (cool) */
-  --chart-1: oklch(0.723 0.168 59.48);  /* #F0870C brand */
-  --chart-2: oklch(0.66 0.18 30);       /* #EC5D4B coral */
-  --chart-3: oklch(0.78 0.15 95);       /* #D6B529 gold */
-  --chart-4: oklch(0.63 0.12 200);      /* #009EA6 teal */
-  --chart-5: oklch(0.55 0.14 275);      /* #5B67C2 indigo */
+  /* Chart palette: brand orange first; the rest are fixed so they stay
+     distinguishable from the primary. */
+  --chart-1: var(--primary);
+  --chart-2: #ef3620;
+  --chart-3: #7a5c3e;
+  --chart-4: #c8a27a;
+  --chart-5: #424242;
 
   /* Sidebar — translucent menu, subtle accent */
-  --sidebar: oklch(0.985 0 0 / 0.85);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.723 0.168 59.48);
-  --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.723 0.168 59.48);
+  --sidebar: #fdf5efd9;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--foreground);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 .dark {
-  /* Base: zinc / Theme: orange — DARK */
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.723 0.168 59.48); /* #F0870C */
-  --primary-foreground: oklch(0.141 0.005 285.823);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 0.1);
-  --input: oklch(1 0 0 / 0.15);
-  --ring: oklch(0.723 0.168 59.48);
+  --background: #1a0b02; /* espresso */
+  --foreground: #fff0e4; /* cream text, 17:1 */
+  --card: #26170a;
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary-foreground: var(--background); /* 8.1:1 */
+  --secondary: #36281d;
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --muted-foreground: #b8a79a; /* 7.5:1 on card */
+  --accent: var(--secondary);
+  --accent-foreground: var(--foreground);
+  --destructive: #fc452f;
+  --destructive-foreground: var(--background);
+  --border: #433529;
+  --input: #756659;
+  --primary-ink: var(--primary); /* orange text is fine on espresso, 8.1:1 */
+  --ring: var(--primary);
+  --success: #7cc79a;
+  --warning: #e9b949;
 
-  --chart-1: oklch(0.723 0.168 59.48);  /* #F0870C brand */
-  --chart-2: oklch(0.66 0.18 30);       /* #EC5D4B coral */
-  --chart-3: oklch(0.78 0.15 95);       /* #D6B529 gold */
-  --chart-4: oklch(0.63 0.12 200);      /* #009EA6 teal */
-  --chart-5: oklch(0.55 0.14 275);      /* #5B67C2 indigo */
+  --chart-2: #fc452f;
+  --chart-3: #c8a27a;
+  --chart-4: #8a7a66;
+  --chart-5: var(--foreground);
 
   /* Translucent dark sidebar */
-  --sidebar: oklch(0.21 0.006 285.885 / 0.85);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.723 0.168 59.48);
-  --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 0.1);
-  --sidebar-ring: oklch(0.723 0.168 59.48);
+  --sidebar: #26170ad9;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary-foreground: var(--background);
+  --sidebar-accent: var(--secondary);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+}
+
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --background: oklch(from var(--primary) 0.985 calc(c * 0.06 * var(--surface-tint)) h);
+    --foreground: oklch(from var(--primary) 0.18 calc(c * 0.05 * var(--surface-tint)) h);
+    --card: oklch(from var(--primary) 0.998 calc(c * 0.02 * var(--surface-tint)) h);
+    --secondary: oklch(from var(--primary) 0.95 calc(c * 0.09 * var(--surface-tint)) h);
+    --muted-foreground: oklch(from var(--primary) 0.47 calc(c * 0.09 * var(--surface-tint)) h);
+    --border: oklch(from var(--primary) 0.91 calc(c * 0.09 * var(--surface-tint)) h);
+    --input: oklch(from var(--primary) 0.6 calc(c * 0.06 * var(--surface-tint)) h);
+    --primary-ink: oklch(from var(--primary) min(l, 0.55) c h);
+    --sidebar: oklch(from var(--primary) 0.975 calc(c * 0.07 * var(--surface-tint)) h / 0.85);
+  }
+
+  .dark {
+    --background: oklch(from var(--primary) 0.17 calc(c * 0.2 * var(--surface-tint)) h);
+    --foreground: oklch(from var(--primary) 0.965 calc(c * 0.14 * var(--surface-tint)) h);
+    --card: oklch(from var(--primary) 0.22 calc(c * 0.19 * var(--surface-tint)) h);
+    --secondary: oklch(from var(--primary) 0.29 calc(c * 0.17 * var(--surface-tint)) h);
+    --muted-foreground: oklch(from var(--primary) 0.74 calc(c * 0.16 * var(--surface-tint)) h);
+    --border: oklch(from var(--primary) 0.34 calc(c * 0.17 * var(--surface-tint)) h);
+    --input: oklch(from var(--primary) 0.52 calc(c * 0.16 * var(--surface-tint)) h);
+    --primary-ink: var(--primary);
+    --sidebar: oklch(from var(--primary) 0.22 calc(c * 0.19 * var(--surface-tint)) h / 0.85);
+  }
+}
+
+@theme inline {
+  --color-primary-ink: var(--primary-ink);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
 }
 
 /**
