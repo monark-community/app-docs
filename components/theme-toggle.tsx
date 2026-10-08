@@ -3,19 +3,28 @@
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@shell/components/shell-ui/button"
+import { cn } from "@shell/lib/utils"
 
-export function ThemeToggle() {
+/**
+ * The standard Monark theme toggle (brand guidelines §10): a 36px ghost icon
+ * button, moon in light mode, sun in dark mode. The icons swap with CSS, so
+ * there is no hydration flash.
+ */
+export function ThemeToggle({ className }: { className?: string }) {
   const { setTheme, resolvedTheme } = useTheme()
 
   return (
     <Button
+      type="button"
       variant="ghost"
       size="icon"
+      className={cn("size-9", className)}
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       aria-label="Toggle theme"
+      title="Toggle theme"
     >
-      <Sun className="size-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-      <Moon className="absolute size-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+      <Sun className="hidden size-[18px] dark:block" aria-hidden="true" />
+      <Moon className="size-[18px] dark:hidden" aria-hidden="true" />
     </Button>
   )
 }
